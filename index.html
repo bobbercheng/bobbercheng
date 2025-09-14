@@ -90,6 +90,7 @@
             position: relative;
             overflow: hidden;
             border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+            background: url('space-bg.svg') no-repeat center/cover;
         }
 
         /* Futuristic SVG Background Implementation */
@@ -101,7 +102,7 @@
             height: 100%;
             z-index: 1;
             /* Adding a gradient overlay to darken the background and enhance focus */
-            background: radial-gradient(ellipse at center, rgba(5, 5, 21, 0.4) 0%, var(--bg-dark) 75%);
+            background: radial-gradient(ellipse at center, rgba(5, 5, 21, 0.4) 0%, rgba(5, 5, 21, 0.9) 75%);
         }
         
         #network-svg {
@@ -116,7 +117,7 @@
             position: relative;
             padding: 50px;
             /* Glassmorphism effect for modern look */
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(10px);
             border-radius: 15px;
             border: 1px solid rgba(0, 255, 255, 0.2);

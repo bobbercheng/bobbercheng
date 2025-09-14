@@ -161,15 +161,39 @@
             margin-bottom: 15px;
         }
 
-        .card p {
-            font-size: 1.1rem;
-            font-weight: 300;
-        }
+          .card p {
+              font-size: 1.1rem;
+              font-weight: 300;
+          }
 
-        /* Footer */
-        footer {
-            text-align: center;
-            padding: 30px 0;
+          /* Resume Tool Section */
+          .resume-tool {
+              text-align: center;
+              padding: 60px 0;
+          }
+
+          .resume-button {
+              display: inline-block;
+              padding: 15px 30px;
+              background: var(--primary-color);
+              color: var(--bg-dark);
+              font-family: 'Orbitron', sans-serif;
+              font-weight: 700;
+              text-decoration: none;
+              border-radius: 30px;
+              box-shadow: 0 0 10px var(--primary-color);
+              transition: background 0.3s, box-shadow 0.3s;
+          }
+
+          .resume-button:hover {
+              background: var(--secondary-color);
+              box-shadow: 0 0 15px var(--secondary-color);
+          }
+
+          /* Footer */
+          footer {
+              text-align: center;
+              padding: 30px 0;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
             margin-top: 50px;
         }
@@ -194,12 +218,18 @@
             .cards {
                 flex-direction: column;
             }
-            .hero-content {
-                padding: 30px;
-            }
-        }
-    </style>
-</head>
+              .hero-content {
+                  padding: 30px;
+              }
+              .resume-tool {
+                  padding: 40px 0;
+              }
+              .resume-button {
+                  padding: 12px 25px;
+              }
+          }
+      </style>
+  </head>
 <body>
     <header>
         <div class="container">
@@ -287,10 +317,15 @@
                     <h3>Immediate Cost Reduction</h3>
                     <p>We deliver measurable results rapidly. By analyzing and optimizing complex operational workflows, we enabled a client to reduce their maintenance costs by 10% within the first month.</p>
                 </div>
-            </div>
-        </div>
-    </section>
-</main>
+              </div>
+          </div>
+      </section>
+      <section class="resume-tool">
+          <div class="container">
+              <a class="resume-button" href="https://resume-ai.vexorium.net" target="_blank" rel="noopener">Generate Your ATS-Friendly Resume for Free</a>
+          </div>
+      </section>
+  </main>
 
 <footer>
     <p>&copy; 2025 Vexorium Technologies Inc. The Future, Empowered.</p>

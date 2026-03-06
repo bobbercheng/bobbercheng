@@ -397,11 +397,11 @@
             <div class="cards">
                 <div class="card">
                     <h3>IT rethinking</h3>
-                    <p>Spend too much cost on IT service and not get expect services. Rethink it as superhuman intelligence.</p>
+                    <p>Spending too much on IT services but still not getting expected outcomes? Rethink it with superhuman intelligence.</p>
                 </div>
                 <div class="card">
-                    <h3>rethinking your job</h3>
-                    <p>burning out due for lacks of skills or too much hands-on works. Rethinking it as you need to lead agents with superhuman intelligence.</p>
+                    <h3>Rethinking your job</h3>
+                    <p>Burning out because of skill gaps or too much hands-on work? Rethink your role: lead agents with superhuman intelligence.</p>
                 </div>
                 <div class="card">
                     <h3>Beyond AI Limitations</h3>
@@ -416,7 +416,7 @@
       </section>
       <section class="resume-tool">
           <div class="container">
-              <a id="openClaudeGraph" class="resume-button" href="#">Explore secretes of Claude</a>
+              <a id="openClaudeGraph" class="resume-button" href="#">Explore Secrets of Claude</a>
               <br><br>
               <a class="resume-button" href="https://resume-ai.vexorium.net" target="_blank" rel="noopener">Generate Your ATS-Friendly Resume for Free</a>
           </div>
@@ -428,9 +428,9 @@
 </footer>
 
 <div id="claudeGraphModal" class="modal-overlay" aria-hidden="true">
-    <div class="modal-frame" role="dialog" aria-label="Explore secretes of Claude">
+    <div class="modal-frame" role="dialog" aria-label="Explore Secrets of Claude">
         <button id="closeClaudeGraph" class="modal-close" aria-label="Close">×</button>
-        <iframe class="modal-iframe" src="./explore.html" title="Claude Knowledge Graph"></iframe>
+        <iframe id="claudeGraphFrame" class="modal-iframe" src="about:blank" data-src="./explore.html" title="Claude Knowledge Graph"></iframe>
     </div>
 </div>
 
@@ -439,12 +439,31 @@
   const openBtn = document.getElementById('openClaudeGraph');
   const closeBtn = document.getElementById('closeClaudeGraph');
   const modal = document.getElementById('claudeGraphModal');
+  const frame = document.getElementById('claudeGraphFrame');
 
   function openModal(e) {
     if (e) e.preventDefault();
     modal.classList.add('show');
     modal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
+
+    // Load graph only when modal is visible so canvas can auto-fit correctly
+    const src = frame.getAttribute('data-src');
+    if (!frame.src || frame.src === 'about:blank') {
+      frame.src = src;
+    } else {
+      // Refresh graph sizing when reopening
+      try {
+        frame.contentWindow.dispatchEvent(new Event('resize'));
+      } catch (_) {}
+    }
+
+    // Dispatch resize after paint for accurate canvas dimensions
+    setTimeout(() => {
+      try {
+        frame.contentWindow.dispatchEvent(new Event('resize'));
+      } catch (_) {}
+    }, 120);
   }
 
   function closeModal() {

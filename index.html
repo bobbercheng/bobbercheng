@@ -414,9 +414,9 @@
               </div>
           </div>
       </section>
-      <section class="resume-tool">
+      <section id="explore-claude" class="resume-tool">
           <div class="container">
-              <a id="openClaudeGraph" class="resume-button" href="#">Explore Secrets of Claude</a>
+              <a id="openClaudeGraph" class="resume-button" href="#">Explore secretes of Claude</a>
               <br><br>
               <a class="resume-button" href="https://resume-ai.vexorium.net" target="_blank" rel="noopener">Generate Your ATS-Friendly Resume for Free</a>
           </div>
@@ -440,6 +440,7 @@
   const closeBtn = document.getElementById('closeClaudeGraph');
   const modal = document.getElementById('claudeGraphModal');
   const frame = document.getElementById('claudeGraphFrame');
+  const exploreSection = document.getElementById('explore-claude');
 
   function openModal(e) {
     if (e) e.preventDefault();
@@ -484,6 +485,28 @@
       closeModal();
     }
   });
+
+  // Deep-link support:
+  // https://www.vexorium.net/?open=claude
+  // https://www.vexorium.net/#explore-claude
+  // https://www.vexorium.net/#explore-claude-open
+  const params = new URLSearchParams(window.location.search);
+  const hash = (window.location.hash || '').toLowerCase();
+  const openParam = (params.get('open') || '').toLowerCase();
+
+  const shouldOpen =
+    openParam === 'claude' ||
+    openParam === 'graph' ||
+    openParam === 'explore-claude' ||
+    hash === '#explore-claude' ||
+    hash === '#explore-claude-open';
+
+  if (shouldOpen && exploreSection) {
+    setTimeout(() => {
+      exploreSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => openModal(), 450);
+    }, 200);
+  }
 })();
 </script>
 </body>

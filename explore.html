@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude API Knowledge Graph</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0c0c0c; color: #e0e0e0; overflow: hidden; }
+  #canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
+  #header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+    padding: 16px 24px; display: flex; align-items: center; gap: 16px;
+    background: linear-gradient(180deg, rgba(12,12,12,0.95) 0%, rgba(12,12,12,0) 100%);
+    pointer-events: none;
+  }
+  #header > * { pointer-events: auto; }
+  #header h1 { font-size: 16px; font-weight: 500; color: rgba(255,255,255,0.5); letter-spacing: 1px; font-family: 'SF Mono', 'Fira Code', monospace; }
+  #header .subtitle { font-size: 11px; color: rgba(255,255,255,0.2); margin-left: 8px; font-family: monospace; }
+  #search {
+    margin-left: auto; padding: 6px 14px; border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03);
+    color: #ccc; font-size: 12px; width: 200px; outline: none; font-family: monospace;
+  }
+  #search:focus { border-color: rgba(196,164,108,0.4); }
+  #search::placeholder { color: rgba(255,255,255,0.15); }
+  #legend {
+    position: fixed; bottom: 20px; left: 20px; z-index: 10;
+    display: flex; flex-wrap: wrap; gap: 10px; font-size: 10px;
+    background: rgba(12,12,12,0.9); padding: 10px 14px; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.06); font-family: monospace;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; cursor: pointer; opacity: 0.6; transition: opacity 0.2s; color: rgba(255,255,255,0.4); }
+  .legend-item:hover { opacity: 1; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .filter-active { opacity: 0.8; }
+  .filter-active .legend-dot { box-shadow: 0 0 6px currentColor; }
+  #stats {
+    position: fixed; bottom: 20px; right: 20px; z-index: 10;
+    font-size: 10px; color: rgba(255,255,255,0.15); font-family: monospace;
+    background: rgba(12,12,12,0.9); padding: 6px 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);
+  }
+  #panel {
+    position: fixed; top: 0; right: -400px; width: 380px; bottom: 0; z-index: 20;
+    background: rgba(14,14,14,0.97); border-left: 1px solid rgba(255,255,255,0.06);
+    padding: 20px; overflow-y: auto; transition: right 0.25s ease;
+    backdrop-filter: blur(20px);
+  }
+  #panel.open { right: 0; }
+  #panel-close {
+    position: absolute; top: 10px; right: 10px; background: none; border: none;
+    color: rgba(255,255,255,0.2); font-size: 18px; cursor: pointer; padding: 4px 8px;
+  }
+  #panel-close:hover { color: rgba(255,255,255,0.6); }
+  #panel h2 { font-size: 18px; margin-bottom: 4px; color: rgba(255,255,255,0.85); font-weight: 500; }
+  .panel-category { font-size: 10px; color: rgba(255,255,255,0.3); margin-bottom: 14px; display: inline-block; padding: 2px 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); font-family: monospace; }
+  .panel-desc { font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.45); margin-bottom: 16px; }
+  #panel h3 { font-size: 10px; color: rgba(196,164,108,0.7); text-transform: uppercase; letter-spacing: 1.5px; margin: 18px 0 8px; font-family: monospace; }
+  .repo-item {
+    font-size: 11px; padding: 7px 10px; margin-bottom: 4px;
+    background: rgba(255,255,255,0.02); border-radius: 5px; border: 1px solid rgba(255,255,255,0.04);
+  }
+  .repo-name { color: rgba(196,164,108,0.8); font-weight: 500; font-family: monospace; }
+  .repo-path { color: rgba(255,255,255,0.2); font-size: 10px; margin-top: 1px; font-family: monospace; }
+  .repo-desc { color: rgba(255,255,255,0.35); font-size: 10px; margin-top: 1px; }
+  .api-item {
+    font-size: 11px; padding: 5px 10px; margin-bottom: 3px;
+    background: rgba(91,155,213,0.06); border-radius: 5px; border: 1px solid rgba(91,155,213,0.1);
+  }
+  .api-name { color: rgba(91,155,213,0.8); font-weight: 500; font-family: monospace; }
+  .api-type { color: rgba(255,255,255,0.2); font-size: 9px; text-transform: uppercase; margin-left: 6px; }
+  .blog-item {
+    font-size: 11px; padding: 5px 10px; margin-bottom: 3px;
+    background: rgba(56,183,100,0.06); border-radius: 5px; border: 1px solid rgba(56,183,100,0.1);
+  }
+  .blog-item a { color: rgba(56,183,100,0.8); text-decoration: none; font-family: monospace; }
+  .blog-item a:hover { color: rgba(56,183,100,1); text-decoration: underline; }
+  .blog-title { color: rgba(56,183,100,0.8); font-family: monospace; }
+  .tech-tag {
+    display: inline-block; font-size: 10px; padding: 1px 7px; margin: 2px;
+    border-radius: 3px; background: rgba(196,164,108,0.08); color: rgba(196,164,108,0.6);
+    border: 1px solid rgba(196,164,108,0.1); font-family: monospace;
+  }
+  .users-section { font-size: 12px; color: rgba(255,255,255,0.35); line-height: 1.5; }
+  #tooltip {
+    position: fixed; z-index: 30; pointer-events: none;
+    background: rgba(14,14,14,0.95); border: 1px solid rgba(255,255,255,0.1);
+    padding: 6px 12px; border-radius: 6px; font-size: 11px;
+    display: none; max-width: 300px; backdrop-filter: blur(10px);
+  }
+  .tt-name { font-weight: 500; color: rgba(255,255,255,0.8); font-family: monospace; font-size: 12px; }
+  .tt-cat { color: rgba(255,255,255,0.3); font-size: 10px; margin-top: 2px; }
+  .tt-path { color: rgba(196,164,108,0.5); font-size: 9px; margin-top: 1px; font-family: monospace; }
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<div id="header">
+  <h1>Claude API Knowledge Graph</h1>
+  <span class="subtitle">14 products · 216 repos · 45 api docs · 70 blog posts</span>
+  <input id="search" type="text" placeholder="search...">
+</div>
+<div id="legend"></div>
+<div id="stats">drag · scroll · click</div>
+<div id="panel">
+  <button id="panel-close">&times;</button>
+  <div id="panel-content"></div>
+</div>
+<div id="tooltip"><div class="tt-name"></div><div class="tt-cat"></div><div class="tt-path"></div></div>
+
+<script>
+const crossRefs = [{"from":"agent-skills","to":"agents-and-tools"},{"from":"agent-skills","to":"blog"},{"from":"agents-and-tools","to":"blog"},{"from":"build-with-claude","to":"blog"},{"from":"build-with-claude","to":"resources"},{"from":"claude-code","to":"blog"},{"from":"claude-code","to":"agent-sdk"},{"from":"getting-started","to":"resources"},{"from":"models-and-pricing","to":"blog"},{"from":"platform-api","to":"blog"},{"from":"prompt-engineering","to":"build-with-claude"},{"from":"prompt-engineering","to":"resources"},{"from":"release-notes","to":"resources"},{"from":"test-and-evaluate","to":"resources"},{"from":"tool-use","to":"agents-and-tools"}];
+const categories = {
+  "AI Agents & Tools": { color: "#777777", products: [
+    {id:"agent-sdk",name:"Agent SDK",desc:"Agent SDK  This product area contains 6 documentation pages.  ### Key Topics  - AskUserQuestion - Bash - BashOutput - Basic file operations (using query) - Basic session - Building a Continuous Conver",users:"Backend developers building agent applications, Python/TypeScript developers, , **Category:** AI Age",tech:[],repos:[{"n": "Agentic loop: streams messages as Claude works", "p": "platform/docs/agent-sdk/quickstart.md", "d": "Quickstart"}, {"n": "Before", "p": "platform/docs/agent-sdk/migration-guide.md", "d": "from claude_code_sdk import query, ClaudeCodeOptions"}, {"n": "Overview", "p": "platform/docs/agent-sdk/overview.md", "d": "Agent SDK"}, {"n": "Typescript", "p": "platform/docs/agent-sdk/typescript.md", "d": "Agent SDK reference - TypeScript"}, {"n": "Typescript V2 Preview", "p": "platform/docs/agent-sdk/typescript-v2-preview.md", "d": "TypeScript SDK V2 interface (preview)"}, {"n": "Use with Claude", "p": "platform/docs/agent-sdk/python.md", "d": "options = ClaudeAgentOptions( mcp_servers={\"calc\": calculator}, allowed_tools=[\"mcp__calc__add\", \"mcp__calc__multiply\"],"}],api_items:[{"n": "[Agentic loop: streams messages as Claude works](https://platform.claude.com/docs/en/agent-sdk/quickstart)", "t": "section"}, {"n": "Sections", "t": "section"}, {"n": "[Before](https://platform.claude.com/docs/en/agent-sdk/migration-guide)", "t": "section"}, {"n": "Sections", "t": "section"}, {"n": "[Overview](https://platform.claude.com/docs/en/agent-sdk/overview)", "t": "section"}, {"n": "Sections", "t": "section"}, {"n": "[Typescript](https://platform.claude.com/docs/en/agent-sdk/typescript)", "t": "section"}, {"n": "Sections", "t": "section"}, {"n": "[Typescript V2 Preview](https://platform.claude.com/docs/en/agent-sdk/typescript-v2-preview)", "t": "section"}, {"n": "Sections", "t": "section"}, {"n": "[Use with Claude](https://platform.claude.com/docs/en/agent-sdk/python)", "t": "section"}, {"n": "options = ClaudeAgentOptions( mcp_servers={\"calc\": calculator}, allowed_tools=[\"mcp__calc__add\", \"mcp__calc__multiply\"], )", "t": "endpoint"}, {"n": "Sections", "t": "section"}],blog_items:[]},
+    {id:"agent-skills",name:"Agent Skills",desc:"Agent Skills  This product area contains 4 documentation pages and 4 related blog posts.  ### Key Topics  - API-based distribution - Avoid Windows-style paths - Avoid assuming tools are installed - Av",users:"Developers building custom Claude skills, power users automating workflows, teams standardizing Clau",tech:[],repos:[{"n": "A complete guide to building skills for Claude", "p": "blog/2026-01/complete-guide-to-building-skills-for-claude.md", "d": "Share"}, {"n": "Improving frontend design through Skills", "p": "blog/2025-11/improving-frontend-design-through-skills.md", "d": "Share"}, {"n": "Improving skill-creator: Test, measure, and refine Agent Ski", "p": "blog/2026-03/improving-skill-creator-test-measure-and-refine-agent-skills.md", "d": "Share"}, {"n": "Updates to Claude Team", "p": "blog/2026-01/claude-team-updates.md", "d": "Share"}, {"n": "Best Practices", "p": "platform/docs/agents-and-tools/agent-skills/best-practices.md", "d": "Agent Skills"}, {"n": "Enterprise", "p": "platform/docs/agents-and-tools/agent-skills/enterprise.md", "d": "Skills for enterprise"}, {"n": "List Anthropic-managed Skills", "p": "platform/docs/agents-and-tools/agent-skills/quickstart.md", "d": "skills = client.beta.skills.list(source=\"anthropic\", betas=[\"skills-2025-10-02\"])"}, {"n": "Overview", "p": "platform/docs/agents-and-tools/agent-skills/overview.md", "d": "Agent Skills"}],api_items:[],blog_items:[{"n": "Improving frontend design through Skills", "u": "https://claude.com/blog/improving-frontend-design-through-skills"}, {"n": "Improving skill-creator: Test, measure, and refine Agent Skills", "u": "https://claude.com/blog/improving-skill-creator-test-measure-and-refine-agent-skills"}, {"n": "A complete guide to building skills for Claude", "u": "https://claude.com/blog/complete-guide-to-building-skills-for-claude"}, {"n": "Updates to Claude Team", "u": "https://claude.com/blog/claude-team-updates"}]},
+    {id:"agents-and-tools",name:"Agents & Tools",desc:"MCP connector  This product area contains 2 documentation pages and 17 related blog posts.  ### Key Topics  - Allowlist - Enable only specific tools - Available helpers - Basic example - Basic structu",users:"Agent developers, tool builders, MCP connector developers, , **Category:** AI Agents & Tools",tech:[],repos:[{"n": "A complete guide to building skills for Claude", "p": "blog/2026-01/complete-guide-to-building-skills-for-claude.md", "d": "Share"}, {"n": "Advancing finance with Claude Opus 4.6", "p": "blog/2026-02/opus-4-6-finance.md", "d": "Share"}, {"n": "Building AI agents for financial services", "p": "blog/2025-10/building-ai-agents-in-financial-services.md", "d": "Share"}, {"n": "Claude Code On The Web", "p": "blog/2025-10/claude-code-on-the-web.md", "d": "Claude Code on the web"}, {"n": "Claude can now connect to your world", "p": "blog/2025-05/integrations.md", "d": "Share"}, {"n": "Common workflow patterns for AI agents", "p": "blog/2026-03/common-workflow-patterns-for-ai-agents-and-when-to-use-them.md", "d": "Share"}, {"n": "Cowork and plugins for finance", "p": "blog/2026-02/cowork-plugins-finance.md", "d": "Feb 24, 2026"}, {"n": "Cowork and plugins for teams across the enterprise", "p": "blog/2026-02/cowork-plugins-across-enterprise.md", "d": "Feb 24, 2026"}, {"n": "How Anthropic teams use Claude Code", "p": "blog/2025-07/how-anthropic-teams-use-claude-code.md", "d": "Share"}, {"n": "How enterprises are building AI agents in 2026", "p": "blog/2025-12/how-enterprises-are-building-ai-agents-in-2026.md", "d": "Share"}, {"n": "How leading retailers are turning AI pilots into enterprise-", "p": "blog/2026-01/how-leading-retailers-are-turning-ai-pilots-into-enterprise-wide-transformation.md", "d": "Share"}, {"n": "Improved Web Search with Dynamic Filtering", "p": "blog/2026-02/improved-web-search-with-dynamic-filtering.md", "d": "Share"}, {"n": "Improving skill-creator: Test, measure, and refine Agent Ski", "p": "blog/2026-03/improving-skill-creator-test-measure-and-refine-agent-skills.md", "d": "Share"}, {"n": "Introducing Cowork", "p": "blog/2026-01/cowork-research-preview.md", "d": "Share"}, {"n": "Piloting Claude in Chrome", "p": "blog/2025-08/claude-for-chrome.md", "d": "Share"}, {"n": "Self Serve Enterprise", "p": "blog/2026-02/self-serve-enterprise.md", "d": "Claude Enterprise, now available self-serve"}, {"n": "Updates to Claude Team", "p": "blog/2026-01/claude-team-updates.md", "d": "Share"}, {"n": "Mcp Connector", "p": "platform/docs/agents-and-tools/mcp-connector.md", "d": "MCP connector"}, {"n": "Remote Mcp Servers", "p": "platform/docs/agents-and-tools/remote-mcp-servers.md", "d": "Several companies have deployed remote MCP servers that developers can connect to via the Anthropic MCP connector API. T"}],api_items:[],blog_items:[{"n": "Building AI agents for financial services", "u": "https://claude.com/blog/building-ai-agents-in-financial-services"}, {"n": "Claude can now connect to your world", "u": "https://claude.com/blog/integrations"}, {"n": "Common workflow patterns for AI agents", "u": "https://claude.com/blog/common-workflow-patterns-for-ai-agents-and-when-to-use-them"}, {"n": "Improving skill-creator: Test, measure, and refine Agent Skills", "u": "https://claude.com/blog/improving-skill-creator-test-measure-and-refine-agent-skills"}, {"n": "How Anthropic teams use Claude Code", "u": "https://claude.com/blog/how-anthropic-teams-use-claude-code"}, {"n": "A complete guide to building skills for Claude", "u": "https://claude.com/blog/complete-guide-to-building-skills-for-claude"}, {"n": "Updates to Claude Team", "u": "https://claude.com/blog/claude-team-updates"}, {"n": "How leading retailers are turning AI pilots into enterprise-wide transformation", "u": "https://claude.com/blog/how-leading-retailers-are-turning-ai-pilots-into-enterprise-wide-transformation"}, {"n": "Introducing Cowork", "u": "https://claude.com/blog/cowork-research-preview"}, {"n": "Cowork and plugins for teams across the enterprise", "u": "https://claude.com/blog/cowork-plugins-across-enterprise"}, {"n": "Cowork and plugins for finance", "u": "https://claude.com/blog/cowork-plugins-finance"}, {"n": "Improved Web Search with Dynamic Filtering", "u": "https://claude.com/blog/improved-web-search-with-dynamic-filtering"}, {"n": "Advancing finance with Claude Opus 4.6", "u": "https://claude.com/blog/opus-4-6-finance"}, {"n": "How enterprises are building AI agents in 2026", "u": "https://claude.com/blog/how-enterprises-are-building-ai-agents-in-2026"}, {"n": "Piloting Claude in Chrome", "u": "https://claude.com/blog/claude-for-chrome"}, {"n": "Self Serve Enterprise", "u": "https://claude.com/blog/self-serve-enterprise"}, {"n": "Claude Code On The Web", "u": "https://claude.com/blog/claude-code-on-the-web"}]},
+    {id:"tool-use",name:"Tool Use",desc:"Tool use with Claude  This product area contains 12 documentation pages.  ### Key Topics  - Add action delays - Advanced usage - Anthropic-managed execution - Backward compatibility - Bash command res",users:"Developers integrating Claude with external tools, agent builders, automation engineers, , **Categor",tech:[],repos:[{"n": "Fine Grained Tool Streaming", "p": "platform/docs/agents-and-tools/tool-use/fine-grained-tool-streaming.md", "d": "Fine-grained tool streaming"}, {"n": "First request with tool search", "p": "platform/docs/agents-and-tools/tool-use/tool-search-tool.md", "d": "messages = [{\"role\": \"user\", \"content\": \"What's the weather in Seattle?\"}]"}, {"n": "First request with web fetch", "p": "platform/docs/agents-and-tools/tool-use/web-fetch-tool.md", "d": "\"role\": \"user\", \"content\": \"Analyze this research paper: https://arxiv.org/abs/2024.12345\", } ]"}, {"n": "First request with web search and cache breakpoint", "p": "platform/docs/agents-and-tools/tool-use/web-search-tool.md", "d": "{\"role\": \"user\", \"content\": \"What's the current weather in San Francisco today?\"} ]"}, {"n": "First, upload a file", "p": "platform/docs/agents-and-tools/tool-use/code-execution-tool.md", "d": "curl https://api.anthropic.com/v1/files \\ --header \"x-api-key: $ANTHROPIC_API_KEY\" \\ --header \"anthropic-version: 2023-0"}, {"n": "Implement Tool Use", "p": "platform/docs/agents-and-tools/tool-use/implement-tool-use.md", "d": "Tools"}, {"n": "Overview", "p": "platform/docs/agents-and-tools/tool-use/overview.md", "d": "Tool use with Claude"}, {"n": "Programmatic Tool Calling", "p": "platform/docs/agents-and-tools/tool-use/programmatic-tool-calling.md", "d": "Tool infrastructure"}, {"n": "Text Editor Tool", "p": "platform/docs/agents-and-tools/tool-use/text-editor-tool.md", "d": "Tools"}, {"n": "User request", "p": "platform/docs/agents-and-tools/tool-use/bash-tool.md", "d": "\"Install the requests library and create a simple Python script that fetches a joke from an API, then run it.\""}, {"n": "When capturing screenshot", "p": "platform/docs/agents-and-tools/tool-use/computer-use-tool.md", "d": "scale = get_scale_factor(screen_width, screen_height) scaled_width = int(screen_width * scale) scaled_height = int(scree"}, {"n": "Your other tools", "p": "platform/docs/agents-and-tools/tool-use/memory-tool.md", "d": "Memory tool"}],api_items:[],blog_items:[]},
+  ]},
+  "Blog": { color: "#777777", products: [
+    {id:"blog",name:"Blog",desc:"Anthropic blog posts and articles  This product area contains 0 documentation pages and 25 related blog posts.",users:"Product managers, developers, business leaders, AI enthusiasts, , **Category:** Blog",tech:[],repos:[{"n": "A complete guide to building skills for Claude", "p": "blog/2026-01/complete-guide-to-building-skills-for-claude.md", "d": "Share"}, {"n": "Advancing finance with Claude Opus 4.6", "p": "blog/2026-02/opus-4-6-finance.md", "d": "Share"}, {"n": "Building AI agents for financial services", "p": "blog/2025-10/building-ai-agents-in-financial-services.md", "d": "Share"}, {"n": "Claude Code On The Web", "p": "blog/2025-10/claude-code-on-the-web.md", "d": "Claude Code on the web"}, {"n": "Claude and Slack", "p": "blog/2025-10/claude-and-slack.md", "d": "Share"}, {"n": "Claude can now connect to your world", "p": "blog/2025-05/integrations.md", "d": "Share"}, {"n": "Common workflow patterns for AI agents", "p": "blog/2026-03/common-workflow-patterns-for-ai-agents-and-when-to-use-them.md", "d": "Share"}, {"n": "Cowork and plugins for finance", "p": "blog/2026-02/cowork-plugins-finance.md", "d": "Feb 24, 2026"}, {"n": "Cowork and plugins for teams across the enterprise", "p": "blog/2026-02/cowork-plugins-across-enterprise.md", "d": "Feb 24, 2026"}, {"n": "Customize Cowork with plugins", "p": "blog/2026-01/cowork-plugins.md", "d": "Share"}, {"n": "Harvey, Bolt, Shopify &amp; Lovable Test Claude Opus 4.6 Pre", "p": "blog/2026-02/behind-model-launch-what-customers-discovered-testing-claude-opus-4-6-early.md", "d": "Share"}, {"n": "How AI helps break the cost barrier to COBOL modernization", "p": "blog/2026-02/how-ai-helps-break-cost-barrier-cobol-modernization.md", "d": "Share"}, {"n": "How Anthropic teams use Claude Code", "p": "blog/2025-07/how-anthropic-teams-use-claude-code.md", "d": "Share"}, {"n": "How enterprises are building AI agents in 2026", "p": "blog/2025-12/how-enterprises-are-building-ai-agents-in-2026.md", "d": "Share"}, {"n": "How leading retailers are turning AI pilots into enterprise-", "p": "blog/2026-01/how-leading-retailers-are-turning-ai-pilots-into-enterprise-wide-transformation.md", "d": "Share"}, {"n": "Improved Web Search with Dynamic Filtering", "p": "blog/2026-02/improved-web-search-with-dynamic-filtering.md", "d": "Share"}, {"n": "Improving frontend design through Skills", "p": "blog/2025-11/improving-frontend-design-through-skills.md", "d": "Share"}, {"n": "Improving skill-creator: Test, measure, and refine Agent Ski", "p": "blog/2026-03/improving-skill-creator-test-measure-and-refine-agent-skills.md", "d": "Share"}, {"n": "Introducing Cowork", "p": "blog/2026-01/cowork-research-preview.md", "d": "Share"}, {"n": "Introducing the Max Plan", "p": "blog/2025-05/max-plan.md", "d": "May 1, 2025)"}, {"n": "Measure Claude Code&#x27;s impact with contribution metrics", "p": "blog/2026-01/contribution-metrics.md", "d": "Share"}, {"n": "Piloting Claude in Chrome", "p": "blog/2025-08/claude-for-chrome.md", "d": "Share"}, {"n": "Preview, review, and merge with Claude Code", "p": "blog/2026-02/preview-review-and-merge-with-claude-code.md", "d": "Share"}, {"n": "Self Serve Enterprise", "p": "blog/2026-02/self-serve-enterprise.md", "d": "Claude Enterprise, now available self-serve"}, {"n": "Updates to Claude Team", "p": "blog/2026-01/claude-team-updates.md", "d": "Share"}],api_items:[],blog_items:[{"n": "Building AI agents for financial services", "u": "https://claude.com/blog/building-ai-agents-in-financial-services"}, {"n": "Claude and Slack", "u": "https://claude.com/blog/claude-and-slack"}, {"n": "Improving frontend design through Skills", "u": "https://claude.com/blog/improving-frontend-design-through-skills"}, {"n": "Introducing the Max Plan", "u": "https://claude.com/blog/max-plan"}, {"n": "Claude can now connect to your world", "u": "https://claude.com/blog/integrations"}, {"n": "Common workflow patterns for AI agents", "u": "https://claude.com/blog/common-workflow-patterns-for-ai-agents-and-when-to-use-them"}, {"n": "Improving skill-creator: Test, measure, and refine Agent Skills", "u": "https://claude.com/blog/improving-skill-creator-test-measure-and-refine-agent-skills"}, {"n": "How Anthropic teams use Claude Code", "u": "https://claude.com/blog/how-anthropic-teams-use-claude-code"}, {"n": "Customize Cowork with plugins", "u": "https://claude.com/blog/cowork-plugins"}, {"n": "A complete guide to building skills for Claude", "u": "https://claude.com/blog/complete-guide-to-building-skills-for-claude"}, {"n": "Measure Claude Code&#x27;s impact with contribution metrics", "u": "https://claude.com/blog/contribution-metrics"}, {"n": "Updates to Claude Team", "u": "https://claude.com/blog/claude-team-updates"}, {"n": "How leading retailers are turning AI pilots into enterprise-wide transformation", "u": "https://claude.com/blog/how-leading-retailers-are-turning-ai-pilots-into-enterprise-wide-transformation"}, {"n": "Introducing Cowork", "u": "https://claude.com/blog/cowork-research-preview"}, {"n": "Cowork and plugins for teams across the enterprise", "u": "https://claude.com/blog/cowork-plugins-across-enterprise"}, {"n": "Cowork and plugins for finance", "u": "https://claude.com/blog/cowork-plugins-finance"}, {"n": "How AI helps break the cost barrier to COBOL modernization", "u": "https://claude.com/blog/how-ai-helps-break-cost-barrier-cobol-modernization"}, {"n": "Preview, review, and merge with Claude Code", "u": "https://claude.com/blog/preview-review-and-merge-with-claude-code"}, {"n": "Improved Web Search with Dynamic Filtering", "u": "https://claude.com/blog/improved-web-search-with-dynamic-filtering"}, {"n": "Harvey, Bolt, Shopify &amp; Lovable Test Claude Opus 4.6 Pre-Launch", "u": "https://claude.com/blog/behind-model-launch-what-customers-discovered-testing-claude-opus-4-6-early"}]},
+  ]},
+  "Platform API": { color: "#5b8a72", products: [
+    {id:"build-with-claude",name:"Build with Claude",desc:"Build with Claude  This product area contains 32 documentation pages and 11 related blog posts.  ### Key Topics  - 1. Always check stop_reason - 1M token context window - 2. Handle truncated responses",users:"Application developers, prompt engineers, product teams building on Claude, , **Category:** Platform",tech:[],repos:[{"n": "Data Residency", "p": "platform/docs/build-with-claude/data-residency.md", "d": "Administration and monitoring"}, {"n": "A complete guide to building skills for Claude", "p": "blog/2026-01/complete-guide-to-building-skills-for-claude.md", "d": "Share"}, {"n": "Advancing finance with Claude Opus 4.6", "p": "blog/2026-02/opus-4-6-finance.md", "d": "Share"}, {"n": "Building AI agents for financial services", "p": "blog/2025-10/building-ai-agents-in-financial-services.md", "d": "Share"}, {"n": "Claude and Slack", "p": "blog/2025-10/claude-and-slack.md", "d": "Share"}, {"n": "Claude can now connect to your world", "p": "blog/2025-05/integrations.md", "d": "Share"}, {"n": "Customize Cowork with plugins", "p": "blog/2026-01/cowork-plugins.md", "d": "Share"}, {"n": "Harvey, Bolt, Shopify &amp; Lovable Test Claude Opus 4.6 Pre", "p": "blog/2026-02/behind-model-launch-what-customers-discovered-testing-claude-opus-4-6-early.md", "d": "Share"}, {"n": "How enterprises are building AI agents in 2026", "p": "blog/2025-12/how-enterprises-are-building-ai-agents-in-2026.md", "d": "Share"}, {"n": "Improved Web Search with Dynamic Filtering", "p": "blog/2026-02/improved-web-search-with-dynamic-filtering.md", "d": "Share"}, {"n": "Introducing Cowork", "p": "blog/2026-01/cowork-research-preview.md", "d": "Share"}, {"n": "Piloting Claude in Chrome", "p": "blog/2025-08/claude-for-chrome.md", "d": "Share"}, {"n": "Adaptive Thinking", "p": "platform/docs/build-with-claude/adaptive-thinking.md", "d": "Model capabilities"}, {"n": "Batch Processing", "p": "platform/docs/build-with-claude/batch-processing.md", "d": "Model capabilities"}, {"n": "Check if compaction triggered a pause", "p": "platform/docs/build-with-claude/compaction.md", "d": "Compaction"}, {"n": "Citations", "p": "platform/docs/build-with-claude/citations.md", "d": "Model capabilities"}, {"n": "Claude Code Analytics Api", "p": "platform/docs/build-with-claude/claude-code-analytics-api.md", "d": "Administration and monitoring"}, {"n": "Claude In Microsoft Foundry", "p": "platform/docs/build-with-claude/claude-in-microsoft-foundry.md", "d": "Claude on 3rd-party platforms"}, {"n": "Claude On Amazon Bedrock", "p": "platform/docs/build-with-claude/claude-on-amazon-bedrock.md", "d": "Claude on 3rd-party platforms"}, {"n": "Claude On Vertex Ai", "p": "platform/docs/build-with-claude/claude-on-vertex-ai.md", "d": "Claude on Vertex AI"}, {"n": "Context Editing", "p": "platform/docs/build-with-claude/context-editing.md", "d": "Context management"}, {"n": "Context Windows", "p": "platform/docs/build-with-claude/context-windows.md", "d": "Context management"}, {"n": "Define a knowledge base search tool", "p": "platform/docs/build-with-claude/search-results.md", "d": "Search results"}, {"n": "Effort", "p": "platform/docs/build-with-claude/effort.md", "d": "Model capabilities"}, {"n": "Embeddings", "p": "platform/docs/build-with-claude/embeddings.md", "d": "Model capabilities"}, {"n": "Example: Reading a text file and sending it as plain text", "p": "platform/docs/build-with-claude/files.md", "d": "Files API"}, {"n": "Extended Thinking", "p": "platform/docs/build-with-claude/extended-thinking.md", "d": "Model capabilities"}, {"n": "Fast Mode", "p": "platform/docs/build-with-claude/fast-mode.md", "d": "Fast mode (research preview)"}, {"n": "List organization members", "p": "platform/docs/build-with-claude/administration-api.md", "d": "Admin API overview"}, {"n": "Method 1: Fetch and encode a remote PDF", "p": "platform/docs/build-with-claude/pdf-support.md", "d": "PDF support"}, {"n": "Multilingual Support", "p": "platform/docs/build-with-claude/multilingual-support.md", "d": "Multilingual support"}, {"n": "Option 1: Base64-encoded image", "p": "platform/docs/build-with-claude/working-with-messages.md", "d": "Using the Messages API"}, {"n": "Overview", "p": "platform/docs/build-with-claude/overview.md", "d": "Build with Claude"}, {"n": "Process the complete response", "p": "platform/docs/build-with-claude/handling-stop-reasons.md", "d": "Handling stop reasons"}, {"n": "Prompt Caching", "p": "platform/docs/build-with-claude/prompt-caching.md", "d": "Context management"}, {"n": "Step 1: Use a Skill to create a file", "p": "platform/docs/build-with-claude/skills-guide.md", "d": "Using Agent Skills with the API"}, {"n": "Streaming", "p": "platform/docs/build-with-claude/streaming.md", "d": "Streaming Messages"}, {"n": "Structured Outputs", "p": "platform/docs/build-with-claude/structured-outputs.md", "d": "Model capabilities"}, {"n": "Token Counting", "p": "platform/docs/build-with-claude/token-counting.md", "d": "Token counting"}, {"n": "Usage Cost Api", "p": "platform/docs/build-with-claude/usage-cost-api.md", "d": "Administration and monitoring"}, {"n": "Vision", "p": "platform/docs/build-with-claude/vision.md", "d": "Model capabilities"}, {"n": "Workspaces", "p": "platform/docs/build-with-claude/workspaces.md", "d": "Administration and monitoring"}, {"n": "Zero Data Retention", "p": "platform/docs/build-with-claude/zero-data-retention.md", "d": "Administration and monitoring"}],api_items:[{"n": "[Data Residency](https://platform.claude.com/docs/en/build-with-claude/data-residency)", "t": "section"}, {"n": "Endpoints", "t": "section"}, {"n": "POST /v1/messages", "t": "item"}, {"n": "Sections", "t": "section"}],blog_items:[{"n": "Building AI agents for financial services", "u": "https://claude.com/blog/building-ai-agents-in-financial-services"}, {"n": "Claude and Slack", "u": "https://claude.com/blog/claude-and-slack"}, {"n": "Claude can now connect to your world", "u": "https://claude.com/blog/integrations"}, {"n": "Customize Cowork with plugins", "u": "https://claude.com/blog/cowork-plugins"}, {"n": "A complete guide to building skills for Claude", "u": "https://claude.com/blog/complete-guide-to-building-skills-for-claude"}, {"n": "Introducing Cowork", "u": "https://claude.com/blog/cowork-research-preview"}, {"n": "Improved Web Search with Dynamic Filtering", "u": "https://claude.com/blog/improved-web-search-with-dynamic-filtering"}, {"n": "Harvey, Bolt, Shopify &amp; Lovable Test Claude Opus 4.6 Pre-Launch", "u": "https://claude.com/blog/behind-model-launch-what-customers-discovered-testing-claude-opus-4-6-early"}, {"n": "Advancing finance with Claude Opus 4.6", "u": "https://claude.com/blog/opus-4-6-finance"}, {"n": "How enterprises are building AI agents in 2026", "u": "https://claude.com/blog/how-enterprises-are-building-ai-agents-in-2026"}, {"n": "Piloting Claude in Chrome", "u": "https://claude.com/blog/claude-for-chrome"}]},
+    {id:"models-and-pricing",name:"Models & Pricing",desc:"Models overview  This product area contains 6 documentation pages and 5 related blog posts.  ### Key Topics  - 128K output tokens - 2024-09-04: Claude 1 and Instant models - 2025-01-21: Claude 2, Clau",users:"API developers, engineering managers evaluating model options, finance teams tracking costs, , **Cat",tech:[],repos:[{"n": "Advancing finance with Claude Opus 4.6", "p": "blog/2026-02/opus-4-6-finance.md", "d": "Share"}, {"n": "Claude Code On The Web", "p": "blog/2025-10/claude-code-on-the-web.md", "d": "Claude Code on the web"}, {"n": "Harvey, Bolt, Shopify &amp; Lovable Test Claude Opus 4.6 Pre", "p": "blog/2026-02/behind-model-launch-what-customers-discovered-testing-claude-opus-4-6-early.md", "d": "Share"}, {"n": "Improved Web Search with Dynamic Filtering", "p": "blog/2026-02/improved-web-search-with-dynamic-filtering.md", "d": "Share"}, {"n": "Self Serve Enterprise", "p": "blog/2026-02/self-serve-enterprise.md", "d": "Claude Enterprise, now available self-serve"}, {"n": "Choosing A Model", "p": "platform/docs/about-claude/models/choosing-a-model.md", "d": "Choosing the right model"}, {"n": "Model Deprecations", "p": "platform/docs/about-claude/model-deprecations.md", "d": "Model deprecations"}, {"n": "Opus migration", "p": "platform/docs/about-claude/models/migration-guide.md", "d": "model = \"claude-opus-4-5\"  # Before model = \"claude-opus-4-6\"  # After ```"}, {"n": "Overview", "p": "platform/docs/about-claude/models/overview.md", "d": "Models overview"}, {"n": "Pricing", "p": "platform/docs/about-claude/pricing.md", "d": "Pricing"}, {"n": "Whats New Claude 4 6", "p": "platform/docs/about-claude/models/whats-new-claude-4-6.md", "d": "Models & pricing"}],api_items:[],blog_items:[{"n": "Improved Web Search with Dynamic Filtering", "u": "https://claude.com/blog/improved-web-search-with-dynamic-filtering"}, {"n": "Harvey, Bolt, Shopify &amp; Lovable Test Claude Opus 4.6 Pre-Launch", "u": "https://claude.com/blog/behind-model-launch-what-customers-discovered-testing-claude-opus-4-6-early"}, {"n": "Advancing finance with Claude Opus 4.6", "u": "https://claude.com/blog/opus-4-6-finance"}, {"n": "Self Serve Enterprise", "u": "https://claude.com/blog/self-serve-enterprise"}, {"n": "Claude Code On The Web", "u": "https://claude.com/blog/claude-code-on-the-web"}]},
+    {id:"platform-api",name:"Platform API",desc:"API Overview  This product area contains 5 documentation pages and 1 related blog posts.  ### Key Topics  - Availability - Cache-aware ITPM - Claude API - Company - Fast mode rate limits - Getting API",users:"API developers, backend engineers, SDK users, , **Category:** Platform API",tech:[],repos:[{"n": "Api", "p": "platform/docs/api/api.md", "d": "Using the API"}, {"n": "Client Sdks", "p": "platform/docs/api/client-sdks.md", "d": "Client SDKs"}, {"n": "Create", "p": "platform/docs/api/messages/create.md", "d": "Create a Message - Claude API Reference"}, {"n": "Overview", "p": "platform/docs/api/overview.md", "d": "API Overview"}, {"n": "Rate Limits", "p": "platform/docs/api/rate-limits.md", "d": "Support & configuration"}, {"n": "Claude can now connect to your world", "p": "blog/2025-05/integrations.md", "d": "Share"}],api_items:[{"n": "[Api](https://platform.claude.com/docs/en/api)", "t": "section"}, {"n": "Endpoints", "t": "section"}, {"n": "GET /v1/files`)", "t": "item"}, {"n": "GET /v1/models`)", "t": "item"}, {"n": "GET /v1/skills`)", "t": "item"}, {"n": "POST /v1/files`,", "t": "item"}, {"n": "POST /v1/messages/batches`)", "t": "item"}, {"n": "POST /v1/messages/count_tokens`)", "t": "item"}, {"n": "POST /v1/messages`)", "t": "item"}, {"n": "POST /v1/skills`,", "t": "item"}, {"n": "Sections", "t": "section"}, {"n": "[Client Sdks](https://platform.claude.com/docs/en/api/client-sdks)", "t": "section"}, {"n": "Sections", "t": "section"}, {"n": "[Create](https://platform.claude.com/docs/en/api/messages/create)", "t": "section"}, {"n": "Sections", "t": "section"}, {"n": "[Overview](https://platform.claude.com/docs/en/api/overview)", "t": "section"}, {"n": "Endpoints", "t": "section"}, {"n": "GET /v1/files`)", "t": "item"}, {"n": "GET /v1/models`)", "t": "item"}, {"n": "GET /v1/skills`)", "t": "item"}, {"n": "POST /v1/files`,", "t": "item"}, {"n": "POST /v1/messages/batches`)", "t": "item"}, {"n": "POST /v1/messages/count_tokens`)", "t": "item"}, {"n": "POST /v1/messages`)", "t": "item"}, {"n": "POST /v1/skills`,", "t": "item"}, {"n": "Sections", "t": "section"}, {"n": "[Rate Limits](https://platform.claude.com/docs/en/api/rate-limits)", "t": "section"}, {"n": "Sections", "t": "section"}],blog_items:[{"n": "Claude can now connect to your world", "u": "https://claude.com/blog/integrations"}]},
+  ]},
+  "Claude Code": { color: "#777777", products: [
+    {id:"claude-code",name:"Claude Code",desc:"Claude Code is an AI-powered coding assistant that helps you build features, fix bugs, and automate development tasks. It understands your entire codebase and can work across multiple files and tools ",users:"Software developers, engineering teams, DevOps engineers, code reviewers, , **Category:** Claude Cod",tech:[],repos:[{"n": "Claude Code On The Web", "p": "blog/2025-10/claude-code-on-the-web.md", "d": "Claude Code on the web"}, {"n": "Cowork and plugins for finance", "p": "blog/2026-02/cowork-plugins-finance.md", "d": "Feb 24, 2026"}, {"n": "Cowork and plugins for teams across the enterprise", "p": "blog/2026-02/cowork-plugins-across-enterprise.md", "d": "Feb 24, 2026"}, {"n": "How AI helps break the cost barrier to COBOL modernization", "p": "blog/2026-02/how-ai-helps-break-cost-barrier-cobol-modernization.md", "d": "Share"}, {"n": "How Anthropic teams use Claude Code", "p": "blog/2025-07/how-anthropic-teams-use-claude-code.md", "d": "Share"}, {"n": "Improving skill-creator: Test, measure, and refine Agent Ski", "p": "blog/2026-03/improving-skill-creator-test-measure-and-refine-agent-skills.md", "d": "Share"}, {"n": "Introducing Cowork", "p": "blog/2026-01/cowork-research-preview.md", "d": "Share"}, {"n": "Measure Claude Code&#x27;s impact with contribution metrics", "p": "blog/2026-01/contribution-metrics.md", "d": "Share"}, {"n": "Piloting Claude in Chrome", "p": "blog/2025-08/claude-for-chrome.md", "d": "Share"}, {"n": "Preview, review, and merge with Claude Code", "p": "blog/2026-02/preview-review-and-merge-with-claude-code.md", "d": "Share"}, {"n": "Self Serve Enterprise", "p": "blog/2026-02/self-serve-enterprise.md", "d": "Claude Enterprise, now available self-serve"}, {"n": "Updates to Claude Team", "p": "blog/2026-01/claude-team-updates.md", "d": "Share"}, {"n": "Advanced setup", "p": "code/docs/setup.md", "d": "This page covers system requirements, platform-specific installation details, updates, and uninstallation. For a guided"}, {"n": "Authentication", "p": "code/docs/authentication.md", "d": "Claude Code supports multiple authentication methods depending on your setup. Individual users can log in with a Claude."}, {"n": "Automate workflows with hooks", "p": "code/docs/hooks-guide.md", "d": "Hooks are user-defined shell commands that execute at specific points in Claude Code's lifecycle. They provide determini"}, {"n": "Best Practices for Claude Code", "p": "code/docs/best-practices.md", "d": "Claude Code is an agentic coding environment. Unlike a chatbot that answers questions and waits, Claude Code can read yo"}, {"n": "CLI reference", "p": "code/docs/cli-reference.md", "d": "You can start sessions, pipe content, resume conversations, and manage updates with these commands:"}, {"n": "Changelog", "p": "code/docs/changelog.md", "d": "data-color-mode=\"auto\" data-light-theme=\"light\" data-dark-theme=\"dark\" data-a11y-animated-images=\"system\" data-a11y-link"}, {"n": "Checkpointing", "p": "code/docs/checkpointing.md", "d": "Claude Code automatically tracks Claude's file edits as you work, allowing you to quickly undo changes and rewind to pre"}, {"n": "Claude Code GitHub Actions", "p": "code/docs/github-actions.md", "d": "Claude Code GitHub Actions brings AI-powered automation to your GitHub workflow. With a simple `@claude` mention in any"}, {"n": "Claude Code GitLab CI/CD", "p": "code/docs/gitlab-ci-cd.md", "d": "Claude Code for GitLab CI/CD is currently in beta. Features and functionality may evolve as we refine the experience."}, {"n": "Claude Code in Slack", "p": "code/docs/slack.md", "d": "Claude Code in Slack brings the power of Claude Code directly into your Slack workspace. When you mention `@Claude` with"}, {"n": "Claude Code on Amazon Bedrock", "p": "code/docs/amazon-bedrock.md", "d": "Before configuring Claude Code with Bedrock, ensure you have:"}, {"n": "Claude Code on Google Vertex AI", "p": "code/docs/google-vertex-ai.md", "d": "Before configuring Claude Code with Vertex AI, ensure you have:"}, {"n": "Claude Code on Microsoft Foundry", "p": "code/docs/microsoft-foundry.md", "d": "Before configuring Claude Code with Microsoft Foundry, ensure you have:"}, {"n": "Claude Code on the web", "p": "code/docs/claude-code-on-the-web.md", "d": "Claude Code on the web is currently in research preview. </Note>"}, {"n": "Claude Code overview", "p": "code/docs/overview.md", "d": "Claude Code is an AI-powered coding assistant that helps you build features, fix bugs, and automate development tasks. I"}, {"n": "Claude Code settings", "p": "code/docs/settings.md", "d": "Claude Code offers a variety of settings to configure its behavior to meet your needs. You can configure Claude Code by"}, {"n": "Common workflows", "p": "code/docs/common-workflows.md", "d": "This page covers practical workflows for everyday development: exploring unfamiliar code, debugging, refactoring, writin"}, {"n": "Configure permissions", "p": "code/docs/permissions.md", "d": "Claude Code supports fine-grained permissions so that you can specify exactly what the agent is allowed to do and what i"}, {"n": "Configure server-managed settings (public beta)", "p": "code/docs/server-managed-settings.md", "d": "Server-managed settings allow administrators to centrally configure Claude Code through a web-based interface on Claude."}, {"n": "Connect Claude Code to tools via MCP", "p": "code/docs/mcp.md", "d": "export const MCPServersTable = ({platform = \"all\"}) => { const ifYouAreAnAiAgentReadingThisYouShouldInsteadFetch = 'http"}, {"n": "Continue local sessions from any device with Remote Control", "p": "code/docs/remote-control.md", "d": "Remote Control is available on all plans. Team and Enterprise admins must first enable Claude Code in [admin settings](h"}, {"n": "Create and distribute a plugin marketplace", "p": "code/docs/plugin-marketplaces.md", "d": "A **plugin marketplace** is a catalog that lets you distribute plugins to others. Marketplaces provide centralized disco"}, {"n": "Create custom subagents", "p": "code/docs/sub-agents.md", "d": "Subagents are specialized AI assistants that handle specific types of tasks. Each subagent runs in its own context windo"}, {"n": "Create plugins", "p": "code/docs/plugins.md", "d": "Plugins let you extend Claude Code with custom functionality that can be shared across projects and teams. This guide co"}, {"n": "Customize keyboard shortcuts", "p": "code/docs/keybindings.md", "d": "Claude Code supports customizable keyboard shortcuts. Run `/keybindings` to create or open your configuration file at `~"}, {"n": "Customize your status line", "p": "code/docs/statusline.md", "d": "The status line is a customizable bar at the bottom of Claude Code that runs any shell script you configure. It receives"}, {"n": "Data usage", "p": "code/docs/data-usage.md", "d": "**Consumer users (Free, Pro, and Max plans)**: We give you the choice to allow your data to be used to improve future Cl"}, {"n": "Development containers", "p": "code/docs/devcontainer.md", "d": "The reference [devcontainer setup](https://github.com/anthropics/claude-code/tree/main/.devcontainer) and associated [Do"}, {"n": "Discover and install prebuilt plugins through marketplaces", "p": "code/docs/discover-plugins.md", "d": "Plugins extend Claude Code with skills, agents, hooks, and MCP servers. Plugin marketplaces are catalogs that help you d"}, {"n": "Enterprise deployment overview", "p": "code/docs/third-party-integrations.md", "d": "Organizations can deploy Claude Code through Anthropic directly or through a cloud provider. This page helps you choose"}, {"n": "Enterprise network configuration", "p": "code/docs/network-config.md", "d": "Claude Code supports various enterprise network and security configurations through environment variables. This includes"}, {"n": "Extend Claude Code", "p": "code/docs/features-overview.md", "d": "Claude Code combines a model that reasons about your code with [built-in tools](/en/how-claude-code-works#tools) for fil"}, {"n": "Extend Claude with skills", "p": "code/docs/skills.md", "d": "Skills extend what Claude can do. Create a `SKILL.md` file with instructions, and Claude adds it to its toolkit. Claude"}, {"n": "Get started with the desktop app", "p": "code/docs/desktop-quickstart.md", "d": "The desktop app gives you Claude Code with a graphical interface: visual diff review, live app preview, GitHub PR monito"}, {"n": "Hooks reference", "p": "code/docs/hooks.md", "d": "For a quickstart guide with examples, see [Automate workflows with hooks](/en/hooks-guide). </Tip>"}, {"n": "How Claude Code works", "p": "code/docs/how-claude-code-works.md", "d": "Claude Code is an agentic assistant that runs in your terminal. While it excels at coding, it can help with anything you"}, {"n": "How Claude remembers your project", "p": "code/docs/memory.md", "d": "Each Claude Code session begins with a fresh context window. Two mechanisms carry knowledge across sessions:"}, {"n": "Interactive mode", "p": "code/docs/interactive-mode.md", "d": "Keyboard shortcuts may vary by platform and terminal. Press `?` to see available shortcuts for your environment."}, {"n": "JetBrains IDEs", "p": "code/docs/jetbrains.md", "d": "Claude Code integrates with JetBrains IDEs through a dedicated plugin, providing features like interactive diff viewing,"}, {"n": "LLM gateway configuration", "p": "code/docs/llm-gateway.md", "d": "LLM gateways provide a centralized proxy layer between Claude Code and model providers, often providing:"}, {"n": "Legal and compliance", "p": "code/docs/legal-and-compliance.md", "d": "Your use of Claude Code is subject to:"}, {"n": "Manage costs effectively", "p": "code/docs/costs.md", "d": "Claude Code consumes tokens for each interaction. Costs vary based on codebase size, query complexity, and conversation"}, {"n": "Model configuration", "p": "code/docs/model-config.md", "d": "For the `model` setting in Claude Code, you can configure either:"}, {"n": "Monitoring", "p": "code/docs/monitoring-usage.md", "d": "Track Claude Code usage, costs, and tool activity across your organization by exporting telemetry data through OpenTelem"}, {"n": "Optimize your terminal setup", "p": "code/docs/terminal-config.md", "d": "Claude cannot control the theme of your terminal. That's handled by your terminal application. You can match Claude Code"}, {"n": "Orchestrate teams of Claude Code sessions", "p": "code/docs/agent-teams.md", "d": "Agent teams are experimental and disabled by default. Enable them by adding `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` to yo"}, {"n": "Output styles", "p": "code/docs/output-styles.md", "d": "Output styles allow you to use Claude Code as any type of agent while keeping its core capabilities, such as running loc"}, {"n": "Plugins reference", "p": "code/docs/plugins-reference.md", "d": "Looking to install plugins? See [Discover and install plugins](/en/discover-plugins). For creating plugins, see [Plugins"}, {"n": "Quickstart", "p": "code/docs/quickstart.md", "d": "This quickstart guide will have you using AI-powered coding assistance in a few minutes. By the end, you'll understand h"}, {"n": "Run Claude Code programmatically", "p": "code/docs/headless.md", "d": "The [Agent SDK](https://platform.claude.com/docs/en/agent-sdk/overview) gives you the same tools, agent loop, and contex"}, {"n": "Sandboxing", "p": "code/docs/sandboxing.md", "d": "Claude Code features native sandboxing to provide a more secure environment for agent execution while reducing the need"}, {"n": "Security", "p": "code/docs/security.md", "d": "Your code's security is paramount. Claude Code is built with security at its core, developed according to Anthropic's co"}, {"n": "Speed up responses with fast mode", "p": "code/docs/fast-mode.md", "d": "Fast mode is in [research preview](#research-preview). The feature, pricing, and availability may change based on feedba"}, {"n": "Track team usage with analytics", "p": "code/docs/analytics.md", "d": "Claude Code provides analytics dashboards to help organizations understand developer usage patterns, track contribution"}, {"n": "Troubleshooting", "p": "code/docs/troubleshooting.md", "d": "If you'd rather skip the terminal entirely, the [Claude Code Desktop app](/en/desktop-quickstart) lets you install and u"}, {"n": "Use Claude Code Desktop", "p": "code/docs/desktop.md", "d": "The Code tab within the Claude Desktop app lets you use Claude Code through a graphical interface instead of the termina"}, {"n": "Use Claude Code in VS Code", "p": "code/docs/vs-code.md", "d": "The VS Code extension provides a native graphical interface for Claude Code, integrated directly into your IDE. This is"}, {"n": "Use Claude Code with Chrome (beta)", "p": "code/docs/chrome.md", "d": "Claude Code integrates with the Claude in Chrome browser extension to give you browser automation capabilities from the"}, {"n": "Zero data retention", "p": "code/docs/zero-data-retention.md", "d": "Zero Data Retention (ZDR) is available for Claude Code when used through Claude for Enterprise. When ZDR is enabled, pro"}],api_items:[],blog_items:[{"n": "Improving skill-creator: Test, measure, and refine Agent Skills", "u": "https://claude.com/blog/improving-skill-creator-test-measure-and-refine-agent-skills"}, {"n": "How Anthropic teams use Claude Code", "u": "https://claude.com/blog/how-anthropic-teams-use-claude-code"}, {"n": "Measure Claude Code&#x27;s impact with contribution metrics", "u": "https://claude.com/blog/contribution-metrics"}, {"n": "Updates to Claude Team", "u": "https://claude.com/blog/claude-team-updates"}, {"n": "Introducing Cowork", "u": "https://claude.com/blog/cowork-research-preview"}, {"n": "Cowork and plugins for teams across the enterprise", "u": "https://claude.com/blog/cowork-plugins-across-enterprise"}, {"n": "Cowork and plugins for finance", "u": "https://claude.com/blog/cowork-plugins-finance"}, {"n": "How AI helps break the cost barrier to COBOL modernization", "u": "https://claude.com/blog/how-ai-helps-break-cost-barrier-cobol-modernization"}, {"n": "Preview, review, and merge with Claude Code", "u": "https://claude.com/blog/preview-review-and-merge-with-claude-code"}, {"n": "Piloting Claude in Chrome", "u": "https://claude.com/blog/claude-for-chrome"}, {"n": "Self Serve Enterprise", "u": "https://claude.com/blog/self-serve-enterprise"}, {"n": "Claude Code On The Web", "u": "https://claude.com/blog/claude-code-on-the-web"}]},
+  ]},
+  "Developer Resources": { color: "#777777", products: [
+    {id:"getting-started",name:"Getting Started",desc:"Get started with Claude  This product area contains 2 documentation pages.  ### Documentation Pages  - [Get Started](https://platform.claude.com/docs/en/get-started) - [Intro](https://platform.claude.",users:"New developers, first-time Claude API users, , **Category:** Developer Resources",tech:[],repos:[{"n": "Get Started", "p": "platform/docs/get-started.md", "d": "Get started with Claude"}, {"n": "Intro", "p": "platform/docs/intro.md", "d": "Intro to Claude"}],api_items:[],blog_items:[]},
+    {id:"prompt-engineering",name:"Prompt Engineering",desc:"Prompt engineering overview  This product area contains 3 documentation pages.  ### Key Topics  - Add context to improve performance - Avoid focusing on passing tests and hard-coding - Balancing auton",users:"Prompt engineers, application developers, researchers optimizing Claude outputs, , **Category:** Dev",tech:[],repos:[{"n": "Claude Prompting Best Practices", "p": "platform/docs/build-with-claude/prompt-engineering/claude-prompting-best-practices.md", "d": "Build with Claude"}, {"n": "Overview", "p": "platform/docs/build-with-claude/prompt-engineering/overview.md", "d": "Prompt engineering overview"}, {"n": "Prompting Tools", "p": "platform/docs/build-with-claude/prompt-engineering/prompting-tools.md", "d": "Prompt engineering"}],api_items:[],blog_items:[]},
+    {id:"release-notes",name:"Release Notes",desc:"Overview  This product area contains 1 documentation pages.  ### Key Topics  - April 9th, 2025 - August 11, 2025 - August 12, 2025 - August 13, 2025 - August 14th, 2024  ### Documentation Pages  - [Ov",users:"Developers tracking API changes, engineering managers, product teams, , **Category:** Developer Reso",tech:[],repos:[{"n": "Overview", "p": "platform/docs/release-notes/overview.md", "d": "Overview"}],api_items:[],blog_items:[]},
+    {id:"resources",name:"Resources",desc:"Documentation  This product area contains 1 documentation pages.  ### Key Topics  - Company - Help and security - Learn - Partners - Solutions  ### Documentation Pages  - [Overview](https://platform.c",users:"Developers, new users, educators, , **Category:** Developer Resources",tech:[],repos:[{"n": "Overview", "p": "platform/docs/resources/overview.md", "d": "Documentation"}],api_items:[],blog_items:[]},
+    {id:"test-and-evaluate",name:"Testing & Evaluation",desc:"Define success criteria and build evaluations  This product area contains 8 documentation pages.  ### Key Topics  - 1. Choose the right model - 2. Optimize prompt and output length - 3. Leverage strea",users:"QA engineers, ML engineers, developers shipping Claude-powered features, , **Category:** Developer R",tech:[],repos:[{"n": "Develop Tests", "p": "platform/docs/test-and-evaluate/develop-tests.md", "d": "Define success criteria and build evaluations"}, {"n": "Eval Tool", "p": "platform/docs/test-and-evaluate/eval-tool.md", "d": "Using the Evaluation Tool"}, {"n": "For time-sensitive applications, use Claude Haiku 4.5", "p": "platform/docs/test-and-evaluate/strengthen-guardrails/reduce-latency.md", "d": "Reducing latency"}, {"n": "Increase Consistency", "p": "platform/docs/test-and-evaluate/strengthen-guardrails/increase-consistency.md", "d": "Increase output consistency"}, {"n": "Mitigate Jailbreaks", "p": "platform/docs/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks.md", "d": "Mitigate jailbreaks and prompt injections"}, {"n": "Reduce Hallucinations", "p": "platform/docs/test-and-evaluate/strengthen-guardrails/reduce-hallucinations.md", "d": "Reduce hallucinations"}, {"n": "Reduce Prompt Leak", "p": "platform/docs/test-and-evaluate/strengthen-guardrails/reduce-prompt-leak.md", "d": "Reduce prompt leak"}, {"n": "Stream request and check for refusal", "p": "platform/docs/test-and-evaluate/strengthen-guardrails/handle-streaming-refusals.md", "d": "Streaming refusals"}],api_items:[],blog_items:[]},
+  ]},
+};
+
+// ============ BUILD GRAPH WITH REPO NODES ============
+const nodes=[], edges=[], catNames=Object.keys(categories);
+catNames.forEach((cat,ci)=>{
+  nodes.push({id:'cat_'+ci, type:'category', name:cat, color:categories[cat].color, r:26, catIndex:ci, products:categories[cat].products.length});
+  categories[cat].products.forEach(p=>{
+    const rc=p.repos.length;
+    const pr=Math.max(7,Math.min(18,5+rc*1.2));
+    nodes.push({...p, type:'product', catIndex:ci, r:pr, repoCount:rc});
+    edges.push({source:'cat_'+ci, target:p.id, strength:0.4});
+    // Add repo nodes
+    p.repos.forEach((repo,ri)=>{
+      const rid='repo_'+p.id+'_'+ri;
+      nodes.push({id:rid, type:'repo', name:repo.n, repoPath:repo.p, repoDesc:repo.d, color:categories[cat].color, r:3, catIndex:ci, parentProduct:p.id});
+      edges.push({source:p.id, target:rid, strength:0.6, type:'repo'});
+    });
+  });
+});
+
+// Add tech component nodes (if techComponents is defined)
+const techNames=typeof techComponents!=='undefined'?Object.keys(techComponents):[];
+techNames.forEach(tech=>{
+  const td=techComponents[tech];
+  const sz=Math.max(4,Math.min(14,2+td.count*0.6));
+  nodes.push({id:'tech_'+tech, type:'tech', name:tech, color:td.color, techCat:td.category, r:sz, repoCount:td.count});
+  td.repos.forEach(repoName=>{
+    const repoNode=nodes.find(n=>n.type==='repo'&&n.name===repoName);
+    if(repoNode) edges.push({source:'tech_'+tech, target:repoNode.id, strength:0.12, type:'tech'});
+  });
+});
+
+// Add product dependency edges (if productDeps is defined)
+if(typeof productDeps!=='undefined'){
+  productDeps.forEach(d=>{
+    const src=nodes.find(n=>n.type==='product'&&n.id===d.from);
+    const tgt=nodes.find(n=>n.type==='product'&&n.id===d.to);
+    if(src&&tgt) edges.push({source:d.from, target:d.to, strength:0.2, type:'dep', label:d.label||''});
+  });
+}
+
+// Add cross-reference edges (if crossRefs is defined)
+if(typeof crossRefs!=='undefined'){
+  crossRefs.forEach(r=>{
+    const src=nodes.find(n=>n.type==='product'&&n.id===r.from);
+    const tgt=nodes.find(n=>n.type==='product'&&n.id===r.to);
+    if(src&&tgt) edges.push({source:r.from, target:r.to, strength:0.08, type:'ref'});
+  });
+}
+
+const canvas=document.getElementById('canvas'), ctx=canvas.getContext('2d');
+let W,H,dpr=window.devicePixelRatio||1;
+function resize(){W=innerWidth;H=innerHeight;canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.width=W+'px';canvas.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);} resize(); onresize=resize;
+
+nodes.forEach((n,i)=>{
+  if(n.type==='category'){
+    const ci=parseInt(n.id.split('_')[1]);
+    const a=(ci/catNames.length)*Math.PI*2-Math.PI/2;
+    n.x=W/2+Math.cos(a)*420;n.y=H/2+Math.sin(a)*340;
+  } else if(n.type==='product'){
+    const c=nodes.find(x=>x.id==='cat_'+n.catIndex);
+    const a=Math.random()*Math.PI*2, s=160+Math.random()*200;
+    n.x=c.x+Math.cos(a)*s;n.y=c.y+Math.sin(a)*s;
+  } else if(n.type==='tech'){
+    const ti=techNames.indexOf(n.name);
+    const a=(ti/Math.max(techNames.length,1))*Math.PI*2+0.5;
+    n.x=W/2+Math.cos(a)*(550+Math.random()*80);n.y=H/2+Math.sin(a)*(440+Math.random()*80);
+  } else {
+    const parent=nodes.find(x=>x.id===n.parentProduct);
+    const a=Math.random()*Math.PI*2, s=60+Math.random()*80;
+    n.x=parent.x+Math.cos(a)*s;n.y=parent.y+Math.sin(a)*s;
+  }
+  n.vx=0;n.vy=0;
+});
+
+function simulate(alpha){
+  alpha=alpha||0.15;
+  // Index for fast edge lookups
+  const ni={};nodes.forEach((n,i)=>ni[n.id]=i);
+  // All-pairs repulsion for non-repo; repo repels within range
+  for(let i=0;i<nodes.length;i++){
+    if(nodes[i]._h)continue;
+    for(let j=i+1;j<nodes.length;j++){
+      if(nodes[j]._h)continue;
+      const a=nodes[i],b=nodes[j];
+      // Cross-product repos: skip if far
+      if(a.type==='repo'&&b.type==='repo'&&a.parentProduct!==b.parentProduct){
+        const dd=Math.hypot(a.x-b.x,a.y-b.y);if(dd>150)continue;
+      }
+      let dx=b.x-a.x,dy=b.y-a.y,d=Math.sqrt(dx*dx+dy*dy)||1;
+      // Larger minimum distance based on node types
+      let minD;
+      if(a.type==='repo'||b.type==='repo') minD=(a.r+b.r+20)*4;
+      else minD=(a.r+b.r+30)*5;
+      if(d<minD){let f=(minD-d)*0.04*alpha;a.vx-=(dx/d)*f;a.vy-=(dy/d)*f;b.vx+=(dx/d)*f;b.vy+=(dy/d)*f;}
+    }
+  }
+  // Edge springs
+  edges.forEach(e=>{
+    let si=ni[e.source],ti=ni[e.target];if(si===undefined||ti===undefined)return;
+    let s=nodes[si],t=nodes[ti];
+    let dx=t.x-s.x,dy=t.y-s.y,d=Math.sqrt(dx*dx+dy*dy)||1;
+    let td=e.type==='repo'?90:e.type==='tech'?280:e.type==='dep'?400:e.type==='ref'?350:220;
+    let str=e.type==='repo'?0.5:(e.strength||0.25);
+    let f=(d-td)*0.003*alpha*str;
+    s.vx+=(dx/d)*f;s.vy+=(dy/d)*f;t.vx-=(dx/d)*f;t.vy-=(dy/d)*f;
+  });
+  // Gentle centering + damping
+  nodes.forEach(n=>{n.vx+=(W/2-n.x)*0.00015;n.vy+=(H/2-n.y)*0.00015;n.vx*=0.65;n.vy*=0.65;n.x+=n.vx;n.y+=n.vy;});
+}
+// Warm-up: run 800 iterations before first render
+for(let i=0;i<800;i++) simulate(0.6-i*0.0005);
+
+// Auto-fit: zoom/pan to frame all nodes with padding
+function autoFit(){
+  let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+  nodes.forEach(n=>{if(n.x-n.r<minX)minX=n.x-n.r;if(n.x+n.r>maxX)maxX=n.x+n.r;if(n.y-n.r<minY)minY=n.y-n.r;if(n.y+n.r>maxY)maxY=n.y+n.r;});
+  const padX=80,padTop=100,padBot=80,gw=maxX-minX+padX*2,gh=maxY-minY+padTop+padBot;
+  const k=Math.min(W/gw,H/gh,1.0);
+  const cx=minX+(maxX-minX)/2,cy=minY+(maxY-minY)/2+10;
+  tf.k=k;tf.x=W/2-cx*k;tf.y=H/2-cy*k;
+}
+
+let tf={x:0,y:0,k:1},hov=null,sel=null,search='',hidden=new Set(),time=0;
+let connectedSet=new Set(), connectedEdges=new Set();
+function s2w(sx,sy){return{x:(sx-tf.x)/tf.k,y:(sy-tf.y)/tf.k};}
+
+function updateConnected(){
+  connectedSet.clear(); connectedEdges.clear();
+  if(!hov&&!sel)return;
+  const focus=hov||sel;
+  connectedSet.add(focus.id);
+  // First pass: direct connections
+  edges.forEach((e,ei)=>{
+    if(e.source===focus.id||e.target===focus.id){
+      connectedEdges.add(ei); connectedSet.add(e.source); connectedSet.add(e.target);
+    }
+  });
+  // Tech connections: only expand when hovering a tech node directly
+  if(focus.type==='tech'){
+    edges.forEach((e,ei)=>{
+      if(e.type==='tech'&&(e.source===focus.id||e.target===focus.id)){
+        connectedEdges.add(ei);connectedSet.add(e.source);connectedSet.add(e.target);
+      }
+    });
+    // Also highlight parent products of connected repos
+    connectedSet.forEach(id=>{
+      const n=nodes.find(x=>x.id===id);
+      if(n&&n.type==='repo'&&n.parentProduct){
+        connectedSet.add(n.parentProduct);
+        edges.forEach((e,ei)=>{if(e.source===n.parentProduct&&e.target===id||e.target===n.parentProduct&&e.source===id){connectedEdges.add(ei);}});
+      }
+    });
+  }
+  // When hovering a repo, show its tech nodes (but don't expand further)
+  if(focus.type==='repo'){
+    edges.forEach((e,ei)=>{
+      if(e.type==='tech'&&(e.source===focus.id||e.target===focus.id)){
+        connectedEdges.add(ei);connectedSet.add(e.source);connectedSet.add(e.target);
+      }
+    });
+  }
+  // Second pass: if hovering category or product, include repos of connected products
+  if(focus.type==='category'||focus.type==='product'){
+    const products=new Set([...connectedSet].filter(id=>{const n=nodes.find(x=>x.id===id);return n&&n.type==='product';}));
+    edges.forEach((e,ei)=>{
+      const s=nodes.find(n=>n.id===e.source),t=nodes.find(n=>n.id===e.target);
+      if(!s||!t)return;
+      if((products.has(e.source)&&t.type==='repo')||(products.has(e.target)&&s.type==='repo')){
+        connectedEdges.add(ei); connectedSet.add(e.source); connectedSet.add(e.target);
+      }
+    });
+  }
+  // If hovering a repo, also highlight sibling repos and parent product
+  if(focus.type==='repo'){
+    const parentId=focus.parentProduct;
+    connectedSet.add(parentId);
+    edges.forEach((e,ei)=>{
+      if(e.source===parentId||e.target===parentId){
+        connectedEdges.add(ei); connectedSet.add(e.source); connectedSet.add(e.target);
+      }
+    });
+  }
+}
+
+function draw(){
+  time+=0.016;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+  ctx.save();ctx.translate(tf.x,tf.y);ctx.scale(tf.k,tf.k);
+  const focusing=hov||sel;
+  const zoomShowRepoLabels=tf.k>1.5;
+  const zoomShowRepos=tf.k>0.4;
+
+  // Draw edges
+  edges.forEach((e,ei)=>{
+    let s=nodes.find(n=>n.id===e.source),t=nodes.find(n=>n.id===e.target);if(!s||!t||s._h||t._h)return;
+    // repo edges always visible
+    const isConn=connectedEdges.has(ei);
+
+    if(focusing&&!isConn){
+      ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(t.x,t.y);
+      ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=0.4;ctx.stroke();
+      return;
+    }
+    if(focusing&&isConn){
+      ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(t.x,t.y);
+      if(e.type==='dep'){ctx.setLineDash([5,3]);ctx.strokeStyle='rgba(255,200,120,0.5)';ctx.lineWidth=1.5;ctx.stroke();ctx.setLineDash([]);}
+      else if(e.type==='ref'){ctx.setLineDash([3,5]);ctx.strokeStyle='rgba(100,160,255,0.45)';ctx.lineWidth=1.2;ctx.stroke();ctx.setLineDash([]);}
+      else ctx.strokeStyle=e.type==='repo'?'rgba(255,255,255,0.25)':'rgba(255,255,255,0.35)';
+      ctx.lineWidth=e.type==='repo'?0.8:1.2;ctx.stroke();
+      // Particles on non-repo edges (or repo edges when zoomed)
+      if(e.type!=='repo'||(e.type==='repo'&&tf.k>0.8)){
+        const focusId=(hov||sel).id;
+        let fx,fy,tx,ty;
+        if(e.target===focusId||connectedSet.has(e.target)&&nodes.find(n=>n.id===e.target)?.type==='category'){fx=s.x;fy=s.y;tx=t.x;ty=t.y;}
+        else{fx=t.x;fy=t.y;tx=s.x;ty=s.y;}
+        const pc=e.type==='repo'?2:3, sp=0.4;
+        for(let pi=0;pi<pc;pi++){
+          const ph=(time*sp+pi/pc)%1;
+          const px=fx+(tx-fx)*ph, py=fy+(ty-fy)*ph;
+          const br=0.15+ph*0.5, rad=e.type==='repo'?0.8+ph:1.5+ph*2;
+          const col=focusing.color||'#c4a46c';
+          ctx.beginPath();ctx.arc(px,py,rad,0,Math.PI*2);
+          ctx.fillStyle=col;ctx.globalAlpha=br;ctx.fill();
+          ctx.beginPath();ctx.arc(px,py,rad*2.5,0,Math.PI*2);
+          ctx.fillStyle=col;ctx.globalAlpha=br*0.12;ctx.fill();
+          ctx.globalAlpha=1;
+        }
+      }
+    } else {
+      // Default - all edges visible (arscontexta style)
+      ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(t.x,t.y);
+      if(e.type==='dep'){
+        // Dashed line for dependencies
+        ctx.setLineDash([4,4]);ctx.strokeStyle='rgba(255,180,100,0.15)';ctx.lineWidth=0.8;ctx.stroke();ctx.setLineDash([]);
+        // Don't fall through to second stroke
+      } else if(e.type==='ref'){
+        // Dotted line for cross-references
+        ctx.setLineDash([2,4]);ctx.strokeStyle='rgba(100,160,255,0.12)';ctx.lineWidth=0.6;ctx.stroke();ctx.setLineDash([]);
+      } else if(e.type==='tech'){
+        ctx.strokeStyle='rgba(255,255,255,0.05)';ctx.lineWidth=0.3;
+      } else if(e.type==='repo'){
+        ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=0.5;
+      } else {
+        ctx.strokeStyle='rgba(255,255,255,0.12)';ctx.lineWidth=0.8;
+      }
+      ctx.stroke();
+      {
+        // Ambient flowing particles on ALL edges (arscontexta style)
+        const nPart=e.type==='repo'?1:2;
+        for(let pi=0;pi<nPart;pi++){
+          const sp=0.12+pi*0.05;
+          const ph2=(time*sp+ei*0.37+pi*0.5)%1;
+          const apx=s.x+(t.x-s.x)*ph2, apy=s.y+(t.y-s.y)*ph2;
+          const col='rgba(220,210,180,';
+          // Bright core
+          const rad=1.2+ph2*1.0;
+          ctx.beginPath();ctx.arc(apx,apy,rad,0,Math.PI*2);
+          ctx.globalAlpha=0.25+ph2*0.2;ctx.fillStyle=col+'1)';ctx.fill();
+          // Soft glow
+          ctx.beginPath();ctx.arc(apx,apy,rad*3,0,Math.PI*2);
+          ctx.globalAlpha=0.06+ph2*0.04;ctx.fillStyle=col+'1)';ctx.fill();
+          ctx.globalAlpha=1;
+        }
+      }
+    }
+  });
+
+  // Draw nodes
+  nodes.forEach(n=>{
+    if(n._h)return;
+    const isConn=connectedSet.has(n.id);
+    const isFocus=n===hov||n===sel;
+    const hoverDim=focusing&&!isConn;
+    const searchDim=search&&!n._m;
+    const searchHit=search&&n._m;
+
+    // All nodes always visible (arscontexta style)
+
+    ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+
+    if(searchDim){
+      ctx.fillStyle=n.type==='repo'?'rgba(200,195,185,0.08)':n.color+'15';ctx.fill();
+      if(n.type!=='repo'&&(tf.k>0.4||n.type==='category')){
+        ctx.font=n.type==='category'?'500 10px monospace':'9px monospace';
+        ctx.fillStyle='rgba(255,255,255,0.1)';ctx.textAlign='center';ctx.fillText(n.name,n.x,n.y+n.r+12);
+      }
+      return;
+    }
+    if(hoverDim){
+      ctx.fillStyle=n.type==='repo'?'rgba(200,195,185,0.18)':n.type==='tech'?n.color+'22':n.color+'44';ctx.fill();
+      ctx.font=n.type==='category'?'500 10px monospace':n.type==='repo'?'7px monospace':'9px monospace';
+      ctx.fillStyle='rgba(255,255,255,0.18)';ctx.textAlign='center';
+      ctx.fillText(n.name,n.x,n.y+n.r+(n.type==='repo'?7:12));
+      return;
+    }
+    if(searchHit&&!isFocus){
+      ctx.shadowBlur=n.type==='repo'?8:18;ctx.shadowColor=n.color;
+      ctx.fillStyle=n.color+(n.type==='repo'?'bb':'dd');ctx.fill();ctx.shadowBlur=0;
+      ctx.font=n.type==='repo'?'500 8px monospace':n.type==='category'?'500 11px monospace':'500 10px monospace';
+      ctx.fillStyle='rgba(255,255,255,0.85)';ctx.textAlign='center';
+      ctx.fillText(n.name,n.x,n.y+n.r+(n.type==='repo'?8:13));
+      return;
+    }
+
+    if(isFocus){
+      ctx.shadowBlur=n.type==='repo'?15:30;ctx.shadowColor=n.color;
+      ctx.fillStyle=n.color+'cc';ctx.fill();ctx.shadowBlur=0;
+      ctx.beginPath();ctx.arc(n.x,n.y,n.r+2,0,Math.PI*2);
+      ctx.strokeStyle=n.color;ctx.lineWidth=n.type==='repo'?1:1.5;ctx.stroke();
+      if(n.type!=='repo'){
+        const pulse=Math.sin(time*3)*0.3+0.7;
+        ctx.beginPath();ctx.arc(n.x,n.y,n.r+6+pulse*4,0,Math.PI*2);
+        ctx.strokeStyle=n.color;ctx.globalAlpha=0.08*pulse;ctx.lineWidth=1;ctx.stroke();ctx.globalAlpha=1;
+      }
+    } else if(isConn){
+      ctx.fillStyle=n.type==='repo'?'rgba(255,250,240,0.85)':n.type==='tech'?n.color+'cc':n.color+'dd';ctx.fill();
+      if(n.type!=='repo'){ctx.beginPath();ctx.arc(n.x,n.y,n.r+1,0,Math.PI*2);ctx.strokeStyle=n.color+'44';ctx.lineWidth=1;ctx.stroke();}
+    } else {
+      // Default
+      if(n.type==='tech'){
+      ctx.font=isFocus?'500 9px monospace':'500 7px monospace';
+      ctx.fillStyle=isFocus?'rgba(255,255,255,0.9)':isConn?'rgba(255,255,255,0.65)':'rgba(255,255,255,0.35)';
+      ctx.textAlign='center';ctx.fillText(n.name,n.x,n.y+n.r+8);
+      if(isFocus){ctx.font='7px monospace';ctx.fillStyle='rgba(255,255,255,0.35)';ctx.fillText(n.techCat+' · '+n.repoCount+' repos',n.x,n.y+n.r+17);}
+    } else if(n.type==='repo'){
+        ctx.fillStyle='rgba(220,215,205,0.55)';ctx.fill();
+      } else if(n.type==='tech'){
+        ctx.fillStyle=n.color+'77';ctx.fill();
+        ctx.font='500 7px monospace';ctx.fillStyle='rgba(255,255,255,0.35)';ctx.textAlign='center';
+        ctx.fillText(n.name,n.x,n.y+n.r+8);
+      } else {
+        ctx.fillStyle=n.color+(n.type==='category'?'cc':'99');ctx.fill();
+      }
+    }
+
+    // Labels
+    if(n.type==='repo'){
+      // Only show repo labels on hover/select/search
+      if(isFocus||isConn||searchHit){
+        ctx.font=isFocus?'500 8px monospace':'7px monospace';
+        ctx.fillStyle=isFocus?'rgba(255,255,255,0.9)':isConn?'rgba(255,255,255,0.65)':searchHit?'rgba(255,255,255,0.75)':'rgba(255,255,255,0.35)';
+        ctx.textAlign='center';ctx.fillText(n.name,n.x,n.y+n.r+7);
+      }
+    } else {
+      // Always show product/category labels
+      ctx.font=n.type==='category'?'500 11px monospace':`${isFocus?'500 ':''}10px monospace`;
+      let la=isFocus?0.95:isConn?0.8:(n.type==='category'?0.6:0.45);
+      ctx.fillStyle=`rgba(255,255,255,${la})`;ctx.textAlign='center';
+      ctx.fillText(n.name,n.x,n.y+n.r+12);
+      if(n.type==='product'&&isFocus&&n.repoCount){ctx.font='8px monospace';ctx.fillStyle='rgba(255,255,255,0.4)';ctx.fillText(n.repoCount+(n.repoCount===1?' repo':' repos'),n.x,n.y+n.r+22);}
+    }
+  });
+
+  ctx.restore();simulate();requestAnimationFrame(draw);
+}
+
+// ============ INTERACTION ============
+let dragging=false,dStart={x:0,y:0},dNode=null;
+canvas.onmousedown=e=>{
+  const wp=s2w(e.clientX,e.clientY);
+  const hit=nodes.find(n=>!n._h&&(n.type!=='repo'||tf.k>0.4||(hov||sel))&&Math.hypot(n.x-wp.x,n.y-wp.y)<n.r+4);
+  if(hit)dNode=hit;else dragging=true;
+  dStart={x:e.clientX,y:e.clientY};
+};
+canvas.onmousemove=e=>{
+  if(dragging){tf.x+=e.clientX-dStart.x;tf.y+=e.clientY-dStart.y;dStart={x:e.clientX,y:e.clientY};return;}
+  if(dNode){const wp=s2w(e.clientX,e.clientY);dNode.x=wp.x;dNode.y=wp.y;dNode.vx=0;dNode.vy=0;return;}
+  const wp=s2w(e.clientX,e.clientY);
+  // Prioritize product/category hits, then repos
+  let hit=nodes.find(n=>!n._h&&n.type!=='repo'&&n.type!=='tech'&&Math.hypot(n.x-wp.x,n.y-wp.y)<n.r+4);
+  if(!hit) hit=nodes.find(n=>!n._h&&n.type==='tech'&&Math.hypot(n.x-wp.x,n.y-wp.y)<n.r+5);
+  if(!hit) hit=nodes.find(n=>!n._h&&n.type==='repo'&&(tf.k>0.6||(hov||sel))&&Math.hypot(n.x-wp.x,n.y-wp.y)<n.r+5);
+  if(hit!==hov){hov=hit;updateConnected();}
+  canvas.style.cursor=hit?'pointer':'default';
+  const tt=document.getElementById('tooltip');
+  if(hit&&!dNode){
+    tt.style.display='block';tt.style.left=(e.clientX+14)+'px';tt.style.top=(e.clientY-8)+'px';
+    tt.querySelector('.tt-name').textContent=hit.name;
+    tt.querySelector('.tt-cat').textContent=hit.type==='category'?hit.products+' products':hit.type==='tech'?(hit.techCat+' · '+hit.repoCount+' repos'):hit.type==='repo'?(hit.repoDesc||''):(hit.desc||'').slice(0,90);
+    tt.querySelector('.tt-path').textContent=hit.type==='repo'?(hit.repoPath||''):'';
+  } else tt.style.display='none';
+};
+canvas.onmouseup=e=>{
+  if(dNode&&Math.hypot(e.clientX-dStart.x,e.clientY-dStart.y)<5){
+    sel=sel===dNode?null:dNode;updateConnected();
+    if(sel&&sel.type==='product')openPanel(sel);
+    else if(sel&&sel.type==='repo'){const parent=nodes.find(n=>n.id===sel.parentProduct);if(parent)openPanel(parent);}
+    else document.getElementById('panel').classList.remove('open');
+  }
+  dragging=false;dNode=null;
+};
+canvas.onwheel=e=>{e.preventDefault();const f=e.deltaY>0?0.92:1.08;const wp=s2w(e.clientX,e.clientY);tf.k=Math.max(0.15,Math.min(6,tf.k*f));tf.x=e.clientX-wp.x*tf.k;tf.y=e.clientY-wp.y*tf.k;};
+
+function openPanel(node){
+  const panel=document.getElementById('panel'),content=document.getElementById('panel-content');
+  let h=`<h2>${node.name}</h2><span class="panel-category" style="border-color:${node.color}33;color:${node.color}">${catNames[node.catIndex]}</span><p class="panel-desc">${node.desc||''}</p>`;
+  if(node.users)h+=`<h3>Users</h3><p class="users-section">${node.users}</p>`;
+  if(node.tech&&node.tech.length){h+=`<h3>Tech Stack</h3><div>`;node.tech.forEach(t=>h+=`<span class="tech-tag">${t}</span>`);h+=`</div>`;}
+  if(node.repos&&node.repos.length){h+=`<h3>Repositories (${node.repoCount})</h3>`;node.repos.forEach(r=>{h+=`<div class="repo-item"><div class="repo-name">${r.n}</div><div class="repo-path">${r.p}</div><div class="repo-desc">${r.d}</div></div>`;});}
+  if(node.api_items&&node.api_items.length){h+=`<h3>API Documentation (${node.api_items.length})</h3>`;node.api_items.forEach(a=>{h+=`<div class="api-item"><span class="api-name">${a.n}</span><span class="api-type">${a.t||''}</span></div>`;});}
+  if(node.blog_items&&node.blog_items.length){h+=`<h3>Blog Posts (${node.blog_items.length})</h3>`;node.blog_items.forEach(b=>{if(b.u){h+=`<div class="blog-item"><a href="${b.u}" target="_blank">${b.n}</a></div>`;}else{h+=`<div class="blog-item"><span class="blog-title">${b.n}</span></div>`;}});}
+  content.innerHTML=h;panel.classList.add('open');
+}
+document.getElementById('panel-close').onclick=()=>{document.getElementById('panel').classList.remove('open');sel=null;updateConnected();};
+
+document.getElementById('search').oninput=e=>{
+  search=e.target.value.toLowerCase();
+  nodes.forEach(n=>{
+    if(n.type==='category'){n._m=true;return;}
+    if(n.type==='tech'){
+      n._m=!search||n.name.toLowerCase().includes(search)||(n.techCat||'').toLowerCase().includes(search);
+      return;
+    }
+    if(n.type==='repo'){
+      n._m=!search||n.name.toLowerCase().includes(search)||(n.repoPath||'').toLowerCase().includes(search)||(n.repoDesc||'').toLowerCase().includes(search);
+      return;
+    }
+    n._m=!search||n.name.toLowerCase().includes(search)||(n.desc||'').toLowerCase().includes(search)||(n.tech||[]).some(t=>t.toLowerCase().includes(search))||(n.repos||[]).some(r=>r.n.toLowerCase().includes(search)||r.d.toLowerCase().includes(search))||(n.api_items||[]).some(a=>a.n.toLowerCase().includes(search))||(n.blog_items||[]).some(b=>b.n.toLowerCase().includes(search));
+  });
+};
+
+const legendEl=document.getElementById('legend');
+catNames.forEach((cat,i)=>{const item=document.createElement('div');item.className='legend-item filter-active';item.innerHTML=`<span class="legend-dot" style="background:${categories[cat].color};color:${categories[cat].color}"></span>${cat}`;item.onclick=()=>{if(hidden.has(i)){hidden.delete(i);item.classList.add('filter-active');item.style.opacity='';}else{hidden.add(i);item.classList.remove('filter-active');item.style.opacity='0.2';}nodes.forEach(n=>{if(n.type==='category'&&n.id==='cat_'+i)n._h=hidden.has(i);if((n.type==='product'||n.type==='repo')&&n.catIndex===i)n._h=hidden.has(i);});};legendEl.appendChild(item);});
+
+autoFit();
+draw();
+</script>
+</body>
+</html>

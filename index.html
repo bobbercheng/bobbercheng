@@ -216,10 +216,75 @@
 
           /* Footer */
           footer {
+              position: fixed;
+              bottom: 0;
+              left: 0;
+              width: 100%;
               text-align: center;
-              padding: 30px 0;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            margin-top: 50px;
+              padding: 12px 0;
+              border-top: 1px solid rgba(255, 255, 255, 0.15);
+              background: rgba(5, 5, 21, 0.92);
+              backdrop-filter: blur(6px);
+              z-index: 20;
+        }
+
+        /* Keep content clear of fixed footer */
+        main {
+            padding-bottom: 70px;
+        }
+
+        /* Claude graph modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-frame {
+            width: min(1200px, 96vw);
+            height: min(88vh, 900px);
+            background: rgba(10, 10, 30, 0.98);
+            border: 1px solid rgba(0, 255, 255, 0.35);
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--primary-color);
+            background: rgba(5, 5, 21, 0.9);
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 3;
+        }
+
+        .modal-close:hover {
+            background: var(--primary-color);
+            color: var(--bg-dark);
+        }
+
+        .modal-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #070717;
         }
 
         /* Animations */
@@ -351,7 +416,7 @@
       </section>
       <section class="resume-tool">
           <div class="container">
-              <a class="resume-button" href="./explore.html" target="_blank" rel="noopener">Explore secretes of Claude</a>
+              <a id="openClaudeGraph" class="resume-button" href="#">Explore secretes of Claude</a>
               <br><br>
               <a class="resume-button" href="https://resume-ai.vexorium.net" target="_blank" rel="noopener">Generate Your ATS-Friendly Resume for Free</a>
           </div>
@@ -361,5 +426,46 @@
 <footer>
     <p>&copy; 2025 Vexorium. The Future, Empowered.</p>
 </footer>
+
+<div id="claudeGraphModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal-frame" role="dialog" aria-label="Explore secretes of Claude">
+        <button id="closeClaudeGraph" class="modal-close" aria-label="Close">×</button>
+        <iframe class="modal-iframe" src="./explore.html" title="Claude Knowledge Graph"></iframe>
+    </div>
+</div>
+
+<script>
+(function() {
+  const openBtn = document.getElementById('openClaudeGraph');
+  const closeBtn = document.getElementById('closeClaudeGraph');
+  const modal = document.getElementById('claudeGraphModal');
+
+  function openModal(e) {
+    if (e) e.preventDefault();
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  openBtn.addEventListener('click', openModal);
+  closeBtn.addEventListener('click', closeModal);
+
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('show')) {
+      closeModal();
+    }
+  });
+})();
+</script>
 </body>
 </html>

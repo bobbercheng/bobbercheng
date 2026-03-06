@@ -91,6 +91,63 @@
   .tt-name { font-weight: 500; color: rgba(255,255,255,0.8); font-family: monospace; font-size: 12px; }
   .tt-cat { color: rgba(255,255,255,0.3); font-size: 10px; margin-top: 2px; }
   .tt-path { color: rgba(196,164,108,0.5); font-size: 9px; margin-top: 1px; font-family: monospace; }
+
+  /* Mobile optimization */
+  @media (max-width: 768px) {
+    #header {
+      padding: 10px 12px;
+      gap: 8px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      background: linear-gradient(180deg, rgba(12,12,12,0.98) 0%, rgba(12,12,12,0.65) 60%, rgba(12,12,12,0.1) 100%);
+    }
+    #header h1 {
+      font-size: 12px;
+      letter-spacing: 0.6px;
+      line-height: 1.2;
+      max-width: 46%;
+    }
+    #header .subtitle {
+      font-size: 10px;
+      margin-left: 0;
+      opacity: 0.8;
+      max-width: 48%;
+      line-height: 1.2;
+    }
+    #search {
+      margin-left: 0;
+      width: 100%;
+      font-size: 13px;
+      padding: 8px 12px;
+      border-radius: 12px;
+    }
+    #legend {
+      left: 8px;
+      right: 8px;
+      bottom: 8px;
+      padding: 8px 10px;
+      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      white-space: nowrap;
+      border-radius: 10px;
+      -webkit-overflow-scrolling: touch;
+    }
+    #stats { display: none; }
+    #panel {
+      width: 100%;
+      right: -100%;
+      border-left: none;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      top: 20%;
+      bottom: 0;
+      border-radius: 14px 14px 0 0;
+      padding: 16px;
+    }
+    #panel h2 { font-size: 16px; }
+    .repo-item, .api-item, .blog-item { font-size: 12px; }
+    #tooltip { display: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -187,25 +244,34 @@ if(typeof crossRefs!=='undefined'){
 
 const canvas=document.getElementById('canvas'), ctx=canvas.getContext('2d');
 let W,H,dpr=window.devicePixelRatio||1;
-function resize(){W=innerWidth;H=innerHeight;canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.width=W+'px';canvas.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);} resize(); onresize=resize;
+let isMobile=false;
+function resize(){
+  W=innerWidth;H=innerHeight;
+  isMobile = W <= 768;
+  canvas.width=W*dpr;canvas.height=H*dpr;canvas.style.width=W+'px';canvas.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+resize(); onresize=resize;
 
 nodes.forEach((n,i)=>{
   if(n.type==='category'){
     const ci=parseInt(n.id.split('_')[1]);
     const a=(ci/catNames.length)*Math.PI*2-Math.PI/2;
-    n.x=W/2+Math.cos(a)*420;n.y=H/2+Math.sin(a)*340;
+    const rx=isMobile?260:420, ry=isMobile?200:340;
+    n.x=W/2+Math.cos(a)*rx; n.y=H/2+Math.sin(a)*ry;
   } else if(n.type==='product'){
     const c=nodes.find(x=>x.id==='cat_'+n.catIndex);
-    const a=Math.random()*Math.PI*2, s=160+Math.random()*200;
-    n.x=c.x+Math.cos(a)*s;n.y=c.y+Math.sin(a)*s;
+    const a=Math.random()*Math.PI*2, s=(isMobile?90:160)+Math.random()*(isMobile?90:200);
+    n.x=c.x+Math.cos(a)*s; n.y=c.y+Math.sin(a)*s;
   } else if(n.type==='tech'){
     const ti=techNames.indexOf(n.name);
     const a=(ti/Math.max(techNames.length,1))*Math.PI*2+0.5;
-    n.x=W/2+Math.cos(a)*(550+Math.random()*80);n.y=H/2+Math.sin(a)*(440+Math.random()*80);
+    const rx=isMobile?320:550, ry=isMobile?260:440;
+    n.x=W/2+Math.cos(a)*(rx+Math.random()*(isMobile?30:80));
+    n.y=H/2+Math.sin(a)*(ry+Math.random()*(isMobile?30:80));
   } else {
     const parent=nodes.find(x=>x.id===n.parentProduct);
-    const a=Math.random()*Math.PI*2, s=60+Math.random()*80;
-    n.x=parent.x+Math.cos(a)*s;n.y=parent.y+Math.sin(a)*s;
+    const a=Math.random()*Math.PI*2, s=(isMobile?35:60)+Math.random()*(isMobile?35:80);
+    n.x=parent.x+Math.cos(a)*s; n.y=parent.y+Math.sin(a)*s;
   }
   n.vx=0;n.vy=0;
 });
@@ -237,7 +303,12 @@ function simulate(alpha){
     let si=ni[e.source],ti=ni[e.target];if(si===undefined||ti===undefined)return;
     let s=nodes[si],t=nodes[ti];
     let dx=t.x-s.x,dy=t.y-s.y,d=Math.sqrt(dx*dx+dy*dy)||1;
-    let td=e.type==='repo'?90:e.type==='tech'?280:e.type==='dep'?400:e.type==='ref'?350:220;
+    let td;
+    if(e.type==='repo') td=isMobile?62:90;
+    else if(e.type==='tech') td=isMobile?190:280;
+    else if(e.type==='dep') td=isMobile?260:400;
+    else if(e.type==='ref') td=isMobile?230:350;
+    else td=isMobile?150:220;
     let str=e.type==='repo'?0.5:(e.strength||0.25);
     let f=(d-td)*0.003*alpha*str;
     s.vx+=(dx/d)*f;s.vy+=(dy/d)*f;t.vx-=(dx/d)*f;t.vy-=(dy/d)*f;
@@ -252,7 +323,8 @@ for(let i=0;i<800;i++) simulate(0.6-i*0.0005);
 function autoFit(){
   let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
   nodes.forEach(n=>{if(n.x-n.r<minX)minX=n.x-n.r;if(n.x+n.r>maxX)maxX=n.x+n.r;if(n.y-n.r<minY)minY=n.y-n.r;if(n.y+n.r>maxY)maxY=n.y+n.r;});
-  const padX=80,padTop=100,padBot=80,gw=maxX-minX+padX*2,gh=maxY-minY+padTop+padBot;
+  const padX=isMobile?28:80, padTop=isMobile?110:100, padBot=isMobile?95:80;
+  const gw=maxX-minX+padX*2, gh=maxY-minY+padTop+padBot;
   const k=Math.min(W/gw,H/gh,1.0);
   const cx=minX+(maxX-minX)/2,cy=minY+(maxY-minY)/2+10;
   tf.k=k;tf.x=W/2-cx*k;tf.y=H/2-cy*k;

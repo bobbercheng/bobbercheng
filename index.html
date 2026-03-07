@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Vexorium - Empowering You with Superhuman Intelligence</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Exo+2:wght@300;400&display=swap" rel="stylesheet">
     <style>
@@ -243,6 +243,7 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+            touch-action: none;
         }
 
         .modal-overlay.show {
@@ -285,6 +286,7 @@
             height: 100%;
             border: none;
             background: #070717;
+            touch-action: none;
         }
 
         /* Animations */
@@ -485,6 +487,19 @@
       closeModal();
     }
   });
+
+  // Prevent iOS/Android page pinch-zoom while modal is open (let iframe handle gestures)
+  const blockPageGesture = (e) => {
+    if (modal.classList.contains('show')) e.preventDefault();
+  };
+  document.addEventListener('gesturestart', blockPageGesture, { passive: false });
+  document.addEventListener('gesturechange', blockPageGesture, { passive: false });
+  document.addEventListener('gestureend', blockPageGesture, { passive: false });
+  document.addEventListener('touchmove', (e) => {
+    if (modal.classList.contains('show') && e.touches && e.touches.length > 1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
 
   // Deep-link support:
   // https://www.vexorium.net/?open=claude

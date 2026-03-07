@@ -6,8 +6,8 @@
 <title>Claude API Knowledge Graph</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0c0c0c; color: #e0e0e0; overflow: hidden; }
-  #canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0c0c0c; color: #e0e0e0; overflow: hidden; overscroll-behavior: none; }
+  #canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; touch-action: none; }
   #header {
     position: fixed; top: 0; left: 0; right: 0; z-index: 10;
     padding: 16px 24px; display: flex; align-items: center; gap: 16px;
@@ -602,6 +602,63 @@ canvas.onmouseup=e=>{
 };
 canvas.onwheel=e=>{e.preventDefault();const f=e.deltaY>0?0.92:1.08;const wp=s2w(e.clientX,e.clientY);tf.k=Math.max(0.15,Math.min(6,tf.k*f));tf.x=e.clientX-wp.x*tf.k;tf.y=e.clientY-wp.y*tf.k;};
 
+// Touch gestures (mobile/tablet): one-finger pan/drag, two-finger pinch zoom
+let touchMode=null, pinchStartDist=0, pinchStartK=1, pinchCenter={x:0,y:0};
+function touchDistance(t1,t2){const dx=t2.clientX-t1.clientX,dy=t2.clientY-t1.clientY;return Math.hypot(dx,dy);} 
+function touchCenter(t1,t2){return {x:(t1.clientX+t2.clientX)/2,y:(t1.clientY+t2.clientY)/2};}
+
+canvas.addEventListener('touchstart',e=>{
+  e.preventDefault();
+  if(e.touches.length===1){
+    const t=e.touches[0], wp=s2w(t.clientX,t.clientY);
+    const hit=nodes.find(n=>!n._h&&Math.hypot(n.x-wp.x,n.y-wp.y)<n.r+8);
+    if(hit){ dNode=hit; touchMode='drag-node'; }
+    else { touchMode='pan'; dragging=true; }
+    dStart={x:t.clientX,y:t.clientY};
+  } else if(e.touches.length>=2){
+    touchMode='pinch';
+    dragging=false; dNode=null;
+    const [t1,t2]=[e.touches[0],e.touches[1]];
+    pinchStartDist=touchDistance(t1,t2);
+    pinchStartK=tf.k;
+    pinchCenter=touchCenter(t1,t2);
+  }
+},{passive:false});
+
+canvas.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  if(touchMode==='pinch' && e.touches.length>=2){
+    const [t1,t2]=[e.touches[0],e.touches[1]];
+    const c=touchCenter(t1,t2);
+    const dist=Math.max(1,touchDistance(t1,t2));
+    const scale=dist/Math.max(1,pinchStartDist);
+    const wp=s2w(c.x,c.y);
+    tf.k=Math.max(0.15,Math.min(6,pinchStartK*scale));
+    tf.x=c.x-wp.x*tf.k; tf.y=c.y-wp.y*tf.k;
+    return;
+  }
+  if(e.touches.length!==1) return;
+  const t=e.touches[0];
+  if(touchMode==='pan' && dragging){
+    tf.x+=t.clientX-dStart.x; tf.y+=t.clientY-dStart.y;
+    dStart={x:t.clientX,y:t.clientY};
+  } else if(touchMode==='drag-node' && dNode){
+    const wp=s2w(t.clientX,t.clientY);
+    dNode.x=wp.x; dNode.y=wp.y; dNode.vx=0; dNode.vy=0;
+  }
+},{passive:false});
+
+canvas.addEventListener('touchend',e=>{
+  if(e.touches.length===0){
+    dragging=false; dNode=null; touchMode=null;
+  } else if(e.touches.length===1){
+    // After pinch, continue as pan from remaining finger
+    const t=e.touches[0];
+    touchMode='pan'; dragging=true; dNode=null;
+    dStart={x:t.clientX,y:t.clientY};
+  }
+},{passive:false});
+
 function openPanel(node){
   const panel=document.getElementById('panel'),content=document.getElementById('panel-content');
   let h=`<h2>${node.name}</h2><span class="panel-category" style="border-color:${node.color}33;color:${node.color}">${catNames[node.catIndex]}</span><p class="panel-desc">${node.desc||''}</p>`;
@@ -635,6 +692,11 @@ catNames.forEach((cat,i)=>{const item=document.createElement('div');item.classNa
 
 autoFit();
 draw();
+
+// iOS Safari gesture zoom guard
+['gesturestart','gesturechange','gestureend'].forEach(evt=>{
+  document.addEventListener(evt, e=>e.preventDefault(), {passive:false});
+});
 </script>
 </body>
 </html>

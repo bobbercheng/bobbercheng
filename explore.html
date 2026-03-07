@@ -166,7 +166,7 @@
 <div id="tooltip"><div class="tt-name"></div><div class="tt-cat"></div><div class="tt-path"></div></div>
 
 <script>
-const crossRefs = [{"from":"agent-skills","to":"blog"},{"from":"agent-skills","to":"agents-and-tools"},{"from":"agents-and-tools","to":"blog"},{"from":"build-with-claude","to":"blog"},{"from":"build-with-claude","to":"resources"},{"from":"claude-code","to":"blog"},{"from":"claude-code","to":"agent-sdk"},{"from":"getting-started","to":"resources"},{"from":"models-and-pricing","to":"blog"},{"from":"platform-api","to":"blog"},{"from":"prompt-engineering","to":"resources"},{"from":"prompt-engineering","to":"build-with-claude"},{"from":"release-notes","to":"resources"},{"from":"test-and-evaluate","to":"resources"},{"from":"tool-use","to":"agents-and-tools"}];
+const crossRefs = [{"from":"agent-skills","to":"blog"},{"from":"agent-skills","to":"agents-and-tools"},{"from":"agents-and-tools","to":"blog"},{"from":"build-with-claude","to":"blog"},{"from":"build-with-claude","to":"resources"},{"from":"claude-code","to":"blog"},{"from":"claude-code","to":"agent-sdk"},{"from":"getting-started","to":"resources"},{"from":"models-and-pricing","to":"blog"},{"from":"platform-api","to":"blog"},{"from":"prompt-engineering","to":"build-with-claude"},{"from":"prompt-engineering","to":"resources"},{"from":"release-notes","to":"resources"},{"from":"test-and-evaluate","to":"resources"},{"from":"tool-use","to":"agents-and-tools"}];
 const categories = {
   "AI Agents & Tools": { color: "#777777", products: [
     {id:"agent-sdk",name:"Agent SDK",desc:"Agent SDK  This product area contains 6 documentation pages.  ### Key Topics  - AskUserQuestion - Bash - BashOutput - Basic file operations (using query) - Basic session - Building a Continuous Conver",users:"Backend developers building agent applications, Python/TypeScript developers, , **Category:** AI Age",tech:[],repos:[{"n": "Agentic loop: streams messages as Claude works", "p": "platform/docs/agent-sdk/quickstart.md", "d": "Quickstart"}, {"n": "Before", "p": "platform/docs/agent-sdk/migration-guide.md", "d": "from claude_code_sdk import query, ClaudeCodeOptions"}, {"n": "Overview", "p": "platform/docs/agent-sdk/overview.md", "d": "Agent SDK"}, {"n": "Typescript", "p": "platform/docs/agent-sdk/typescript.md", "d": "Agent SDK reference - TypeScript"}, {"n": "Typescript V2 Preview", "p": "platform/docs/agent-sdk/typescript-v2-preview.md", "d": "TypeScript SDK V2 interface (preview)"}, {"n": "Use with Claude", "p": "platform/docs/agent-sdk/python.md", "d": "options = ClaudeAgentOptions( mcp_servers={\"calc\": calculator}, allowed_tools=[\"mcp__calc__add\", \"mcp__calc__multiply\"],"}],api_items:[{"n": "[Agentic loop: streams messages as Claude works](https://platform.claude.com/docs/en/agent-sdk/quickstart)", "t": "section"}, {"n": "Sections", "t": "section"}, {"n": "[Before](https://platform.claude.com/docs/en/agent-sdk/migration-guide)", "t": "section"}, {"n": "Sections", "t": "section"}, {"n": "[Overview](https://platform.claude.com/docs/en/agent-sdk/overview)", "t": "section"}, {"n": "Sections", "t": "section"}, {"n": "[Typescript](https://platform.claude.com/docs/en/agent-sdk/typescript)", "t": "section"}, {"n": "Sections", "t": "section"}, {"n": "[Typescript V2 Preview](https://platform.claude.com/docs/en/agent-sdk/typescript-v2-preview)", "t": "section"}, {"n": "Sections", "t": "section"}, {"n": "[Use with Claude](https://platform.claude.com/docs/en/agent-sdk/python)", "t": "section"}, {"n": "options = ClaudeAgentOptions( mcp_servers={\"calc\": calculator}, allowed_tools=[\"mcp__calc__add\", \"mcp__calc__multiply\"], )", "t": "endpoint"}, {"n": "Sections", "t": "section"}],blog_items:[]},
@@ -604,6 +604,7 @@ canvas.onwheel=e=>{e.preventDefault();const f=e.deltaY>0?0.92:1.08;const wp=s2w(
 
 // Touch gestures (mobile/tablet): one-finger pan/drag, two-finger pinch zoom
 let touchMode=null, pinchStartDist=0, pinchStartK=1, pinchCenter={x:0,y:0};
+let touchStartPoint={x:0,y:0}, touchMoved=false, touchTapNode=null;
 function touchDistance(t1,t2){const dx=t2.clientX-t1.clientX,dy=t2.clientY-t1.clientY;return Math.hypot(dx,dy);} 
 function touchCenter(t1,t2){return {x:(t1.clientX+t2.clientX)/2,y:(t1.clientY+t2.clientY)/2};}
 
@@ -611,13 +612,16 @@ canvas.addEventListener('touchstart',e=>{
   e.preventDefault();
   if(e.touches.length===1){
     const t=e.touches[0], wp=s2w(t.clientX,t.clientY);
-    const hit=nodes.find(n=>!n._h&&Math.hypot(n.x-wp.x,n.y-wp.y)<n.r+8);
+    const hit=nodes.find(n=>!n._h&&Math.hypot(n.x-wp.x,n.y-wp.y)<n.r+10);
+    touchTapNode = hit || null;
+    touchMoved = false;
+    touchStartPoint = {x:t.clientX, y:t.clientY};
     if(hit){ dNode=hit; touchMode='drag-node'; }
     else { touchMode='pan'; dragging=true; }
     dStart={x:t.clientX,y:t.clientY};
   } else if(e.touches.length>=2){
     touchMode='pinch';
-    dragging=false; dNode=null;
+    dragging=false; dNode=null; touchTapNode=null;
     const [t1,t2]=[e.touches[0],e.touches[1]];
     pinchStartDist=touchDistance(t1,t2);
     pinchStartK=tf.k;
@@ -635,10 +639,12 @@ canvas.addEventListener('touchmove',e=>{
     const wp=s2w(c.x,c.y);
     tf.k=Math.max(0.15,Math.min(6,pinchStartK*scale));
     tf.x=c.x-wp.x*tf.k; tf.y=c.y-wp.y*tf.k;
+    touchMoved = true;
     return;
   }
   if(e.touches.length!==1) return;
   const t=e.touches[0];
+  if(Math.hypot(t.clientX-touchStartPoint.x,t.clientY-touchStartPoint.y)>8) touchMoved=true;
   if(touchMode==='pan' && dragging){
     tf.x+=t.clientX-dStart.x; tf.y+=t.clientY-dStart.y;
     dStart={x:t.clientX,y:t.clientY};
@@ -650,11 +656,23 @@ canvas.addEventListener('touchmove',e=>{
 
 canvas.addEventListener('touchend',e=>{
   if(e.touches.length===0){
-    dragging=false; dNode=null; touchMode=null;
+    // Treat stationary single-touch as click/tap on node
+    if(!touchMoved && touchTapNode){
+      sel = sel===touchTapNode ? null : touchTapNode;
+      updateConnected();
+      if(sel && sel.type==='product') openPanel(sel);
+      else if(sel && sel.type==='repo'){
+        const parent=nodes.find(n=>n.id===sel.parentProduct);
+        if(parent) openPanel(parent);
+      } else {
+        document.getElementById('panel').classList.remove('open');
+      }
+    }
+    dragging=false; dNode=null; touchMode=null; touchTapNode=null;
   } else if(e.touches.length===1){
     // After pinch, continue as pan from remaining finger
     const t=e.touches[0];
-    touchMode='pan'; dragging=true; dNode=null;
+    touchMode='pan'; dragging=true; dNode=null; touchTapNode=null;
     dStart={x:t.clientX,y:t.clientY};
   }
 },{passive:false});

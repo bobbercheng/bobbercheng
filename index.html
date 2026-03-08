@@ -259,21 +259,41 @@
             box-shadow: 0 0 30px rgba(0, 255, 255, 0.25);
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-toolbar {
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 10px;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            background: rgba(5, 5, 21, 0.9);
+            z-index: 3;
+        }
+
+        .graph-version-badge {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            color: #9be7ff;
+            background: rgba(5, 5, 21, 0.78);
+            border: 1px solid rgba(0, 255, 255, 0.35);
+            padding: 4px 8px;
+            border-radius: 8px;
+            pointer-events: none;
         }
 
         .modal-close {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 36px;
-            height: 36px;
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             border: 1px solid var(--primary-color);
             background: rgba(5, 5, 21, 0.9);
             color: var(--primary-color);
-            font-size: 1.2rem;
+            font-size: 1.05rem;
             cursor: pointer;
-            z-index: 3;
         }
 
         .modal-close:hover {
@@ -283,7 +303,7 @@
 
         .modal-iframe {
             width: 100%;
-            height: 100%;
+            height: calc(100% - 44px);
             border: none;
             background: #070717;
             touch-action: none;
@@ -431,8 +451,10 @@
 
 <div id="claudeGraphModal" class="modal-overlay" aria-hidden="true">
     <div class="modal-frame" role="dialog" aria-label="Explore Secrets of Claude">
-        <button id="closeClaudeGraph" class="modal-close" aria-label="Close">×</button>
-        <div id="graphVersionBadge" style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:3;font-family:'Orbitron',sans-serif;font-size:11px;color:#9be7ff;background:rgba(5,5,21,0.78);border:1px solid rgba(0,255,255,0.35);padding:4px 8px;border-radius:8px;pointer-events:none;">Graph updated: --</div>
+        <div class="modal-toolbar">
+            <div id="graphVersionBadge" class="graph-version-badge">Graph updated: --</div>
+            <button id="closeClaudeGraph" class="modal-close" aria-label="Close">×</button>
+        </div>
         <iframe id="claudeGraphFrame" class="modal-iframe" src="about:blank" data-src="./explore.html" title="Claude Knowledge Graph"></iframe>
     </div>
 </div>

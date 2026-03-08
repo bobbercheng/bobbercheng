@@ -432,6 +432,7 @@
 <div id="claudeGraphModal" class="modal-overlay" aria-hidden="true">
     <div class="modal-frame" role="dialog" aria-label="Explore Secrets of Claude">
         <button id="closeClaudeGraph" class="modal-close" aria-label="Close">×</button>
+        <div id="graphVersionBadge" style="position:absolute;left:12px;top:12px;z-index:3;font-family:'Orbitron',sans-serif;font-size:11px;color:#9be7ff;background:rgba(5,5,21,0.75);border:1px solid rgba(0,255,255,0.35);padding:4px 8px;border-radius:8px;">Graph updated: --</div>
         <iframe id="claudeGraphFrame" class="modal-iframe" src="about:blank" data-src="./explore.html" title="Claude Knowledge Graph"></iframe>
     </div>
 </div>
@@ -442,6 +443,7 @@
   const closeBtn = document.getElementById('closeClaudeGraph');
   const modal = document.getElementById('claudeGraphModal');
   const frame = document.getElementById('claudeGraphFrame');
+  const versionBadge = document.getElementById('graphVersionBadge');
   const exploreSection = document.getElementById('explore-claude');
 
   function openModal(e) {
@@ -452,9 +454,14 @@
 
     // Always cache-bust explore.html so latest graph updates appear immediately
     const src = frame.getAttribute('data-src') || './explore.html';
+    const now = new Date();
+    const ver = now.getTime();
     const sep = src.includes('?') ? '&' : '?';
-    const bustedSrc = `${src}${sep}v=${Date.now()}`;
+    const bustedSrc = `${src}${sep}v=${ver}`;
     frame.src = bustedSrc;
+    if (versionBadge) {
+      versionBadge.textContent = `Graph updated: ${now.toLocaleString()}`;
+    }
 
     // Dispatch resize after paint for accurate canvas dimensions
     setTimeout(() => {

@@ -450,16 +450,11 @@
     modal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
 
-    // Load graph only when modal is visible so canvas can auto-fit correctly
-    const src = frame.getAttribute('data-src');
-    if (!frame.src || frame.src === 'about:blank') {
-      frame.src = src;
-    } else {
-      // Refresh graph sizing when reopening
-      try {
-        frame.contentWindow.dispatchEvent(new Event('resize'));
-      } catch (_) {}
-    }
+    // Always cache-bust explore.html so latest graph updates appear immediately
+    const src = frame.getAttribute('data-src') || './explore.html';
+    const sep = src.includes('?') ? '&' : '?';
+    const bustedSrc = `${src}${sep}v=${Date.now()}`;
+    frame.src = bustedSrc;
 
     // Dispatch resize after paint for accurate canvas dimensions
     setTimeout(() => {

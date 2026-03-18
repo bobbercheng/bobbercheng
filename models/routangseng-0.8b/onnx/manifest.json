@@ -1,0 +1,27 @@
+{
+  "decoder_model_merged_quantized.onnx_data": {
+    "chunks": [
+      "decoder_model_merged_quantized.onnx_data.00.chunk",
+      "decoder_model_merged_quantized.onnx_data.01.chunk",
+      "decoder_model_merged_quantized.onnx_data.02.chunk",
+      "decoder_model_merged_quantized.onnx_data.03.chunk",
+      "decoder_model_merged_quantized.onnx_data.04.chunk",
+      "decoder_model_merged_quantized.onnx_data.05.chunk",
+      "decoder_model_merged_quantized.onnx_data.06.chunk",
+      "decoder_model_merged_quantized.onnx_data.07.chunk"
+    ]
+  },
+  "embed_tokens_quantized.onnx_data": {
+    "chunks": [
+      "embed_tokens_quantized.onnx_data.00.chunk",
+      "embed_tokens_quantized.onnx_data.01.chunk",
+      "embed_tokens_quantized.onnx_data.02.chunk"
+    ]
+  },
+  "vision_encoder_quantized.onnx_data": {
+    "chunks": [
+      "vision_encoder_quantized.onnx_data.00.chunk",
+      "vision_encoder_quantized.onnx_data.01.chunk"
+    ]
+  }
+}

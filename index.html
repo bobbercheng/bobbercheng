@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Vexorium - Empowering You with Superhuman Intelligence</title>
+    <link rel="icon" type="image/png" href="./vexorium-logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Exo+2:wght@300;400&display=swap" rel="stylesheet">
     <style>
         /* Global Styles and CSS Variables */
@@ -151,6 +152,83 @@
             color: var(--secondary-color);
             text-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
             margin-bottom: 60px;
+        }
+
+        .proof-banner {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            gap: 26px;
+            align-items: center;
+            margin: 0 0 40px;
+            padding: 30px 34px;
+            border: 1px solid rgba(0, 255, 255, 0.38);
+            border-radius: 14px;
+            color: var(--text-light);
+            background:
+                linear-gradient(120deg, rgba(0, 255, 255, 0.11), rgba(255, 0, 255, 0.09)),
+                var(--card-bg);
+            box-shadow: 0 12px 45px rgba(0, 0, 0, 0.45);
+            text-decoration: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        .proof-banner:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.28);
+        }
+
+        .proof-medal {
+            display: flex;
+            width: 74px;
+            height: 74px;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(224, 232, 245, 0.42);
+            border-radius: 50%;
+            color: #f3f6ff;
+            background: radial-gradient(circle at 35% 30%, #ffffff, #9caac4 42%, #38435f 100%);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.75);
+            box-shadow: 0 0 24px rgba(210, 223, 246, 0.18);
+        }
+
+        .proof-copy {
+            display: grid;
+            gap: 4px;
+        }
+
+        .proof-eyebrow {
+            color: var(--primary-color);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .proof-copy strong {
+            color: #ffffff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.45rem;
+            line-height: 1.3;
+        }
+
+        .proof-copy span:last-child {
+            color: var(--text-light);
+            font-size: 0.98rem;
+        }
+
+        .proof-cta {
+            color: var(--primary-color);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            white-space: nowrap;
+            text-transform: uppercase;
         }
 
         /* Cards Layout (Flexbox) */
@@ -329,6 +407,22 @@
             .cards {
                 flex-direction: column;
             }
+            .proof-banner {
+                grid-template-columns: auto minmax(0, 1fr);
+                gap: 18px;
+                padding: 24px;
+            }
+            .proof-medal {
+                width: 58px;
+                height: 58px;
+                font-size: 1rem;
+            }
+            .proof-copy strong {
+                font-size: 1.15rem;
+            }
+            .proof-cta {
+                grid-column: 1 / -1;
+            }
               .hero-content {
                   padding: 30px;
               }
@@ -413,9 +507,18 @@
         </div>
     </section>
 
-    <section class="achievements">
+    <section class="achievements" id="achievements">
         <div class="container">
             <h2>Proven Impact</h2>
+            <a class="proof-banner" href="./kaggle-autoresearch.html">
+                <span class="proof-medal">2×</span>
+                <span class="proof-copy">
+                    <span class="proof-eyebrow">Autoresearch field report</span>
+                    <strong>Two Kaggle silver medals in 26 days</strong>
+                    <span>#34 in NeuroGolf, then #47 public / #219 private in ROGII—one reusable research system across two domains.</span>
+                </span>
+                <span class="proof-cta">Read the technical story →</span>
+            </a>
             <div class="cards">
                 <div class="card">
                     <h3>IT rethinking</h3>
@@ -438,15 +541,17 @@
       </section>
       <section id="explore-claude" class="resume-tool">
           <div class="container">
-              <a id="openClaudeGraph" class="resume-button" href="#">Explore secretes of Claude</a>
+              <a id="openClaudeGraph" class="resume-button" href="#">Explore Claude eco system with knowledge graph</a>
+              <!--
               <br><br>
               <a class="resume-button" href="https://resume-ai.vexorium.net" target="_blank" rel="noopener">Generate Your ATS-Friendly Resume for Free</a>
+              -->
           </div>
       </section>
   </main>
 
 <footer>
-    <p>&copy; 2025 Vexorium. The Future, Empowered.</p>
+    <p>&copy; 2026 Vexorium. The Future, Empowered.</p>
 </footer>
 
 <div id="claudeGraphModal" class="modal-overlay" aria-hidden="true">

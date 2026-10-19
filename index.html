@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Vexorium - Empowering You with Superhuman Intelligence</title>
     <link rel="icon" type="image/png" href="./vexorium-logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Exo+2:wght@300;400&display=swap" rel="stylesheet">
@@ -268,29 +268,125 @@
               font-weight: 300;
           }
 
-          /* Resume Tool Section */
-          .resume-tool {
-              text-align: center;
-              padding: 60px 0;
-          }
+        /* Featured research */
+        .research {
+            padding: 0 0 70px;
+            scroll-margin-top: 30px;
+        }
 
-          .resume-button {
-              display: inline-block;
-              padding: 15px 30px;
-              background: var(--primary-color);
-              color: var(--bg-dark);
-              font-family: 'Orbitron', sans-serif;
-              font-weight: 700;
-              text-decoration: none;
-              border-radius: 30px;
-              box-shadow: 0 0 10px var(--primary-color);
-              transition: background 0.3s, box-shadow 0.3s;
-          }
+        .research-card {
+            padding: clamp(24px, 5vw, 56px);
+            border: 1px solid rgba(0, 255, 255, 0.35);
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.07), rgba(255, 0, 255, 0.05)), var(--card-bg);
+        }
 
-          .resume-button:hover {
-              background: var(--secondary-color);
-              box-shadow: 0 0 15px var(--secondary-color);
-          }
+        .research-eyebrow {
+            color: var(--primary-color);
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .research-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+            gap: 40px;
+            margin-top: 24px;
+            align-items: start;
+        }
+
+        .research h2 {
+            color: #ffffff;
+            font-size: clamp(1.65rem, 3.5vw, 2.6rem);
+            line-height: 1.25;
+            margin-bottom: 10px;
+        }
+
+        .research-subtitle {
+            font-size: 1.15rem;
+        }
+
+        .research-author {
+            margin-top: 12px;
+            color: #b6b6cf;
+            font-size: 0.95rem;
+        }
+
+        .research-takeaway {
+            margin-top: 24px;
+            color: #ffffff;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .research-summary {
+            margin-top: 10px;
+        }
+
+        .research-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 28px;
+        }
+
+        .research-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+            padding: 11px 20px;
+            border: 1px solid var(--primary-color);
+            border-radius: 6px;
+            color: var(--primary-color);
+            font-weight: 700;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .research-link-primary,
+        .research-link:hover {
+            color: var(--bg-dark);
+            background: var(--primary-color);
+        }
+
+        .research-link-primary:hover {
+            background: #ffffff;
+            border-color: #ffffff;
+        }
+
+        .research a:focus-visible {
+            outline: 3px solid #ffffff;
+            outline-offset: 5px;
+        }
+
+        .research-result {
+            border-left: 2px solid var(--primary-color);
+            padding-left: 26px;
+        }
+
+        .research-result h3 {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1rem;
+            letter-spacing: 0;
+            margin-bottom: 6px;
+        }
+
+        .research-count {
+            color: var(--primary-color);
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.3;
+            margin-bottom: 14px;
+        }
+
+        .research-scope {
+            color: #b6b6cf;
+            font-size: 0.9rem;
+            margin-top: 16px;
+        }
 
           /* Footer */
           footer {
@@ -309,82 +405,6 @@
         /* Keep content clear of fixed footer */
         main {
             padding-bottom: 70px;
-        }
-
-        /* Claude graph modal */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            touch-action: none;
-        }
-
-        .modal-overlay.show {
-            display: flex;
-        }
-
-        .modal-frame {
-            width: min(1200px, 96vw);
-            height: min(88vh, 900px);
-            background: rgba(10, 10, 30, 0.98);
-            border: 1px solid rgba(0, 255, 255, 0.35);
-            border-radius: 12px;
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.25);
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .modal-toolbar {
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 6px 10px;
-            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
-            background: rgba(5, 5, 21, 0.9);
-            z-index: 3;
-        }
-
-        .graph-version-badge {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 11px;
-            color: #9be7ff;
-            background: rgba(5, 5, 21, 0.78);
-            border: 1px solid rgba(0, 255, 255, 0.35);
-            padding: 4px 8px;
-            border-radius: 8px;
-            pointer-events: none;
-        }
-
-        .modal-close {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: 1px solid var(--primary-color);
-            background: rgba(5, 5, 21, 0.9);
-            color: var(--primary-color);
-            font-size: 1.05rem;
-            cursor: pointer;
-        }
-
-        .modal-close:hover {
-            background: var(--primary-color);
-            color: var(--bg-dark);
-        }
-
-        .modal-iframe {
-            width: 100%;
-            height: calc(100% - 44px);
-            border: none;
-            background: #070717;
-            touch-action: none;
         }
 
         /* Animations */
@@ -426,12 +446,23 @@
               .hero-content {
                   padding: 30px;
               }
-              .resume-tool {
-                  padding: 40px 0;
-              }
-              .resume-button {
-                  padding: 12px 25px;
-              }
+            .research-layout {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 30px;
+            }
+            .research-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .research-result {
+                padding-left: 20px;
+            }
+            footer {
+                position: static;
+            }
+            main {
+                padding-bottom: 0;
+            }
           }
       </style>
   </head>
@@ -539,13 +570,30 @@
               </div>
           </div>
       </section>
-      <section id="explore-claude" class="resume-tool">
+      <section id="verification-gap" class="research" aria-labelledby="research-title">
           <div class="container">
-              <a id="openClaudeGraph" class="resume-button" href="#">Explore Claude eco system with knowledge graph</a>
-              <!--
-              <br><br>
-              <a class="resume-button" href="https://resume-ai.vexorium.net" target="_blank" rel="noopener">Generate Your ATS-Friendly Resume for Free</a>
-              -->
+              <article class="research-card">
+                  <p class="research-eyebrow">Accepted · MATH-AI 2026 workshop at NeurIPS 2026</p>
+                  <div class="research-layout">
+                      <div>
+                          <h2 id="research-title">The Verification Gap</h2>
+                          <p class="research-subtitle">Auditing Proof Progress and Repair on IMO 2026</p>
+                          <p class="research-author">Bobber Cheng · Vexorium</p>
+                          <p class="research-takeaway">An AI judge can spot the error. The acceptance rule can still let it pass.</p>
+                          <p class="research-summary">This study examines how grading rules turn model judgments into acceptance decisions. A score that allows repairable errors can admit an incomplete proof. For autonomous research, the rule that authorizes progress deserves its own audit.</p>
+                          <div class="research-actions">
+                              <a class="research-link research-link-primary" href="https://github.com/bobbercheng/verification-gap/blob/main/paper.pdf">Read the paper (PDF) <span aria-hidden="true">&nbsp;↗</span></a>
+                              <a class="research-link" href="https://github.com/bobbercheng/verification-gap">Explore code &amp; evidence <span aria-hidden="true">&nbsp;↗</span></a>
+                          </div>
+                      </div>
+                      <aside class="research-result" aria-labelledby="research-result-title">
+                          <h3 id="research-result-title">In the planted-defect study</h3>
+                          <p class="research-count">13 of 16</p>
+                          <p>texts labeled as fatal errors or proof gaps passed when both graders had to score at least 5/7, in each of two runs. At least one grader quoted the edited passage in every accepted case.</p>
+                          <p class="research-scope">32 hand-picked texts under one rubric. Five defect labels are disputed; excluding them, 8 of 11 passed. Labels were model-generated and not expert-validated. These counts are specific to the study.</p>
+                      </aside>
+                  </div>
+              </article>
           </div>
       </section>
   </main>
@@ -554,103 +602,15 @@
     <p>&copy; 2026 Vexorium. The Future, Empowered.</p>
 </footer>
 
-<div id="claudeGraphModal" class="modal-overlay" aria-hidden="true">
-    <div class="modal-frame" role="dialog" aria-label="Explore Secrets of Claude">
-        <div class="modal-toolbar">
-            <div id="graphVersionBadge" class="graph-version-badge">Graph updated: --</div>
-            <button id="closeClaudeGraph" class="modal-close" aria-label="Close">×</button>
-        </div>
-        <iframe id="claudeGraphFrame" class="modal-iframe" src="about:blank" data-src="./explore.html" title="Claude Knowledge Graph"></iframe>
-    </div>
-</div>
-
 <script>
+// Preserve previously shared graph links after retiring the homepage modal.
 (function() {
-  const openBtn = document.getElementById('openClaudeGraph');
-  const closeBtn = document.getElementById('closeClaudeGraph');
-  const modal = document.getElementById('claudeGraphModal');
-  const frame = document.getElementById('claudeGraphFrame');
-  const versionBadge = document.getElementById('graphVersionBadge');
-  const exploreSection = document.getElementById('explore-claude');
-
-  function openModal(e) {
-    if (e) e.preventDefault();
-    modal.classList.add('show');
-    modal.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
-
-    // Always cache-bust explore.html so latest graph updates appear immediately
-    const src = frame.getAttribute('data-src') || './explore.html';
-    const now = new Date();
-    const ver = now.getTime();
-    const sep = src.includes('?') ? '&' : '?';
-    const bustedSrc = `${src}${sep}v=${ver}`;
-    frame.src = bustedSrc;
-    if (versionBadge) {
-      versionBadge.textContent = `Graph updated: ${now.toLocaleString()}`;
+    const open = (new URLSearchParams(window.location.search).get('open') || '').toLowerCase();
+    const hash = window.location.hash.toLowerCase();
+    if (['claude', 'graph', 'explore-claude'].includes(open) ||
+        ['#explore-claude', '#explore-claude-open'].includes(hash)) {
+        window.location.replace('./explore.html');
     }
-
-    // Dispatch resize after paint for accurate canvas dimensions
-    setTimeout(() => {
-      try {
-        frame.contentWindow.dispatchEvent(new Event('resize'));
-      } catch (_) {}
-    }, 120);
-  }
-
-  function closeModal() {
-    modal.classList.remove('show');
-    modal.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
-  }
-
-  openBtn.addEventListener('click', openModal);
-  closeBtn.addEventListener('click', closeModal);
-
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && modal.classList.contains('show')) {
-      closeModal();
-    }
-  });
-
-  // Prevent iOS/Android page pinch-zoom while modal is open (let iframe handle gestures)
-  const blockPageGesture = (e) => {
-    if (modal.classList.contains('show')) e.preventDefault();
-  };
-  document.addEventListener('gesturestart', blockPageGesture, { passive: false });
-  document.addEventListener('gesturechange', blockPageGesture, { passive: false });
-  document.addEventListener('gestureend', blockPageGesture, { passive: false });
-  document.addEventListener('touchmove', (e) => {
-    if (modal.classList.contains('show') && e.touches && e.touches.length > 1) {
-      e.preventDefault();
-    }
-  }, { passive: false });
-
-  // Deep-link support:
-  // https://www.vexorium.net/?open=claude
-  // https://www.vexorium.net/#explore-claude
-  // https://www.vexorium.net/#explore-claude-open
-  const params = new URLSearchParams(window.location.search);
-  const hash = (window.location.hash || '').toLowerCase();
-  const openParam = (params.get('open') || '').toLowerCase();
-
-  const shouldOpen =
-    openParam === 'claude' ||
-    openParam === 'graph' ||
-    openParam === 'explore-claude' ||
-    hash === '#explore-claude' ||
-    hash === '#explore-claude-open';
-
-  if (shouldOpen && exploreSection) {
-    setTimeout(() => {
-      exploreSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      setTimeout(() => openModal(), 450);
-    }, 200);
-  }
 })();
 </script>
 </body>

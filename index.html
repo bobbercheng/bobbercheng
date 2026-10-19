@@ -141,17 +141,9 @@
             font-weight: 300;
         }
 
-        /* Achievements Section (What We Did) */
+        /* Autoresearch report and services */
         .achievements {
-            padding: 100px 0;
-        }
-
-        .achievements h2 {
-            text-align: center;
-            font-size: 3rem;
-            color: var(--secondary-color);
-            text-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
-            margin-bottom: 60px;
+            padding: 0 0 70px;
         }
 
         .proof-banner {
@@ -270,7 +262,7 @@
 
         /* Featured research */
         .research {
-            padding: 0 0 70px;
+            padding: 100px 0 40px;
             scroll-margin-top: 30px;
         }
 
@@ -421,9 +413,6 @@
             .hero p {
                 font-size: 1.2rem;
             }
-            .achievements h2 {
-                font-size: 2.5rem;
-            }
             .cards {
                 flex-direction: column;
             }
@@ -538,9 +527,35 @@
         </div>
     </section>
 
+      <section id="verification-gap" class="research" aria-labelledby="research-title">
+          <div class="container">
+              <article class="research-card">
+                  <p class="research-eyebrow">Accepted · MATH-AI 2026 workshop at NeurIPS 2026</p>
+                  <div class="research-layout">
+                      <div>
+                          <h2 id="research-title">The Verification Gap</h2>
+                          <p class="research-subtitle">Auditing Proof Progress and Repair on IMO 2026</p>
+                          <p class="research-author">Bobber Cheng · Vexorium</p>
+                          <p class="research-takeaway">An AI judge can spot the error. The acceptance rule can still let it pass.</p>
+                          <p class="research-summary">This study examines how grading rules turn model judgments into acceptance decisions. A score that allows repairable errors can admit an incomplete proof. For autonomous research, the rule that authorizes progress deserves its own audit.</p>
+                          <div class="research-actions">
+                              <a class="research-link research-link-primary" href="https://github.com/bobbercheng/verification-gap/blob/main/paper.pdf">Read the paper (PDF) <span aria-hidden="true">&nbsp;↗</span></a>
+                              <a class="research-link" href="https://github.com/bobbercheng/verification-gap">Explore code &amp; evidence <span aria-hidden="true">&nbsp;↗</span></a>
+                          </div>
+                      </div>
+                      <aside class="research-result" aria-labelledby="research-result-title">
+                          <h3 id="research-result-title">In the planted-defect study</h3>
+                          <p class="research-count">13 of 16</p>
+                          <p>texts labeled as fatal errors or proof gaps passed when both graders had to score at least 5/7, in each of two runs. At least one grader quoted the edited passage in every accepted case.</p>
+                          <p class="research-scope">32 hand-picked texts under one rubric. Five defect labels are disputed; excluding them, 8 of 11 passed. Labels were model-generated and not expert-validated. These counts are specific to the study.</p>
+                      </aside>
+                  </div>
+              </article>
+          </div>
+      </section>
+
     <section class="achievements" id="achievements">
         <div class="container">
-            <h2>Proven Impact</h2>
             <a class="proof-banner" href="./kaggle-autoresearch.html">
                 <span class="proof-medal">2×</span>
                 <span class="proof-copy">
@@ -568,32 +583,6 @@
                     <p>We deliver measurable results rapidly. By analyzing and optimizing complex operational workflows, we enabled a client to reduce their business costs by 10% within the first month.</p>
                 </div>
               </div>
-          </div>
-      </section>
-      <section id="verification-gap" class="research" aria-labelledby="research-title">
-          <div class="container">
-              <article class="research-card">
-                  <p class="research-eyebrow">Accepted · MATH-AI 2026 workshop at NeurIPS 2026</p>
-                  <div class="research-layout">
-                      <div>
-                          <h2 id="research-title">The Verification Gap</h2>
-                          <p class="research-subtitle">Auditing Proof Progress and Repair on IMO 2026</p>
-                          <p class="research-author">Bobber Cheng · Vexorium</p>
-                          <p class="research-takeaway">An AI judge can spot the error. The acceptance rule can still let it pass.</p>
-                          <p class="research-summary">This study examines how grading rules turn model judgments into acceptance decisions. A score that allows repairable errors can admit an incomplete proof. For autonomous research, the rule that authorizes progress deserves its own audit.</p>
-                          <div class="research-actions">
-                              <a class="research-link research-link-primary" href="https://github.com/bobbercheng/verification-gap/blob/main/paper.pdf">Read the paper (PDF) <span aria-hidden="true">&nbsp;↗</span></a>
-                              <a class="research-link" href="https://github.com/bobbercheng/verification-gap">Explore code &amp; evidence <span aria-hidden="true">&nbsp;↗</span></a>
-                          </div>
-                      </div>
-                      <aside class="research-result" aria-labelledby="research-result-title">
-                          <h3 id="research-result-title">In the planted-defect study</h3>
-                          <p class="research-count">13 of 16</p>
-                          <p>texts labeled as fatal errors or proof gaps passed when both graders had to score at least 5/7, in each of two runs. At least one grader quoted the edited passage in every accepted case.</p>
-                          <p class="research-scope">32 hand-picked texts under one rubric. Five defect labels are disputed; excluding them, 8 of 11 passed. Labels were model-generated and not expert-validated. These counts are specific to the study.</p>
-                      </aside>
-                  </div>
-              </article>
           </div>
       </section>
   </main>

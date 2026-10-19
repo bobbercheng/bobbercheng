@@ -141,7 +141,7 @@
             font-weight: 300;
         }
 
-        /* Autoresearch report and services */
+        /* Autoresearch report and invitation */
         .achievements {
             padding: 0 0 70px;
         }
@@ -223,42 +223,19 @@
             text-transform: uppercase;
         }
 
-        /* Cards Layout (Flexbox) */
-        .cards {
-            display: flex;
-            gap: 40px;
-            flex-wrap: wrap;
+        /* Research invitation */
+        .research-invitation {
+            padding: clamp(30px, 5vw, 60px) 20px;
+            text-align: center;
         }
 
-        .card {
-            flex: 1;
-            min-width: 300px;
-            background: var(--card-bg);
-            padding: 35px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+        .research-invitation h2 {
+            max-width: 850px;
+            margin: 0 auto 28px;
+            color: #ffffff;
+            font-size: clamp(1.5rem, 3vw, 2.3rem);
+            line-height: 1.4;
         }
-
-        /* Card Hover Effect */
-        .card:hover {
-            transform: translateY(-10px);
-            /* Cyan glow on hover */
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.4);
-            border-color: var(--primary-color);
-        }
-
-        .card h3 {
-            color: var(--primary-color);
-            font-size: 1.5rem;
-            margin-bottom: 15px;
-        }
-
-          .card p {
-              font-size: 1.1rem;
-              font-weight: 300;
-          }
 
         /* Featured research */
         .research {
@@ -349,7 +326,8 @@
             border-color: #ffffff;
         }
 
-        .research a:focus-visible {
+        .research a:focus-visible,
+        .research-invitation a:focus-visible {
             outline: 3px solid #ffffff;
             outline-offset: 5px;
         }
@@ -412,9 +390,6 @@
             }
             .hero p {
                 font-size: 1.2rem;
-            }
-            .cards {
-                flex-direction: column;
             }
             .proof-banner {
                 grid-template-columns: auto minmax(0, 1fr);
@@ -565,24 +540,10 @@
                 </span>
                 <span class="proof-cta">Read the technical story →</span>
             </a>
-            <div class="cards">
-                <div class="card">
-                    <h3>IT rethinking</h3>
-                    <p>Spending too much on IT services but still not getting expected outcomes? Rethink it with superhuman intelligence.</p>
-                </div>
-                <div class="card">
-                    <h3>Rethinking your job</h3>
-                    <p>Burning out because of skill gaps or too much hands-on work? Rethink your role: lead agents with superhuman intelligence.</p>
-                </div>
-                <div class="card">
-                    <h3>Beyond AI Limitations</h3>
-                    <p>Vexorium thrives where standard tools fail. We specialize in resolving the hardest technical challenges that exist beyond the capabilities of contemporary AI coding models, delivering innovative solutions.</p>
-                </div>
-                <div class="card">
-                    <h3>Immediate Business Cost Reduction</h3>
-                    <p>We deliver measurable results rapidly. By analyzing and optimizing complex operational workflows, we enabled a client to reduce their business costs by 10% within the first month.</p>
-                </div>
-              </div>
+            <section class="research-invitation" aria-labelledby="invitation-title">
+                <h2 id="invitation-title">Bring us a research challenge whose results matter.</h2>
+                <a class="research-link research-link-primary" href="mailto:Jennifer.Y@Vexorium.net?subject=Research%20challenge">Tell us about your challenge <span aria-hidden="true">&nbsp;→</span></a>
+            </section>
           </div>
       </section>
   </main>

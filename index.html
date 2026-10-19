@@ -237,6 +237,40 @@
             line-height: 1.4;
         }
 
+        .challenge-categories {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 24px;
+            margin: 36px 0;
+            text-align: left;
+        }
+
+        .challenge-category {
+            padding: 28px;
+            border: 1px solid rgba(0, 255, 255, 0.25);
+            border-radius: 12px;
+            background: var(--card-bg);
+        }
+
+        .challenge-category h3 {
+            color: var(--primary-color);
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1.35rem;
+            letter-spacing: 0;
+            margin-bottom: 14px;
+        }
+
+        .challenge-category p + p {
+            margin-top: 14px;
+            color: #b6b6cf;
+        }
+
+        @media (max-width: 900px) {
+            .challenge-categories {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
         /* Featured research */
         .research {
             padding: 100px 0 40px;
@@ -542,6 +576,23 @@
             </a>
             <section class="research-invitation" aria-labelledby="invitation-title">
                 <h2 id="invitation-title">Bring us a research challenge whose results matter.</h2>
+                <div class="challenge-categories">
+                    <article class="challenge-category">
+                        <h3>IT challenges</h3>
+                        <p>You know what needs to work. Getting there is the hard part.</p>
+                        <p>From stubborn integrations to performance bottlenecks, we investigate the constraints and test a practical path forward.</p>
+                    </article>
+                    <article class="challenge-category">
+                        <h3>Business challenges</h3>
+                        <p>You see the impact on your business, but the problem is hard to pin down and a practical solution remains out of reach.</p>
+                        <p>We help define the problem, investigate its causes, and test possible solutions against the outcomes that matter to you.</p>
+                    </article>
+                    <article class="challenge-category">
+                        <h3>Future challenges</h3>
+                        <p>You worry about what comes next, even if you cannot yet name the challenge.</p>
+                        <p>We explore plausible scenarios, test assumptions, and identify useful steps you can take now.</p>
+                    </article>
+                </div>
                 <a class="research-link research-link-primary" href="mailto:Jennifer.Y@Vexorium.net?subject=Research%20challenge">Tell us about your challenge <span aria-hidden="true">&nbsp;→</span></a>
             </section>
           </div>

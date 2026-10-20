@@ -64,6 +64,12 @@
             text-shadow: 0 0 5px var(--primary-color);
         }
 
+        .header-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
         .contact-button {
             color: var(--primary-color);
             border: 1px solid var(--primary-color);
@@ -468,7 +474,10 @@
     <header>
         <div class="container">
             <div class="logo"></div>
-            <a class="contact-button" href="mailto:Jennifer.Y@Vexorium.net">Contact Us</a>
+            <div class="header-actions">
+                <a class="contact-button" href="./overview.html">Overview</a>
+                <a class="contact-button" href="mailto:Jennifer.Y@Vexorium.net">Contact Us</a>
+            </div>
         </div>
     </header>
 

@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Vexorium · Company Overview</title>
+    <meta name="description" content="Vexorium Technologies builds low-cost AI agents for formal mathematics and verification. One-page company overview: product, traction, technology, business model and roadmap.">
+    <link rel="canonical" href="https://www.vexorium.net/overview.html">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://www.vexorium.net/overview.html">
+    <meta property="og:title" content="Vexorium · Company Overview">
+    <meta property="og:description" content="Low-cost AI agents for formal mathematics and verification: product, traction, technology, business model and roadmap.">
+    <meta property="og:image" content="https://www.vexorium.net/vexorium-logo.png">
+    <meta name="twitter:card" content="summary">
+    <link rel="icon" type="image/png" href="./vexorium-logo.png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #050515;
+            --primary-color: #00ffff;
+            --secondary-color: #ff00ff;
+            --text-light: #e0e0f0;
+            --text-muted: #b6b6cf;
+            --card-bg: rgba(20, 20, 50, 0.8);
+            --line: rgba(0, 255, 255, 0.25);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background: var(--bg-dark) url('space-bg.svg') no-repeat top center / cover fixed;
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding-left: max(20px, env(safe-area-inset-left, 0px));
+            padding-right: max(20px, env(safe-area-inset-right, 0px));
+        }
+
+        h1, h2, h3 {
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1.2px;
+            text-wrap: balance;
+        }
+
+        a { color: var(--primary-color); }
+
+        a:focus-visible {
+            outline: 3px solid #ffffff;
+            outline-offset: 4px;
+        }
+
+        /* Header */
+        header {
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(5, 5, 21, 0.85);
+            backdrop-filter: blur(6px);
+        }
+
+        header .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            min-height: 44px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-shadow: 0 0 6px rgba(0, 255, 255, 0.7);
+            text-decoration: none;
+        }
+
+        .header-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 44px;
+            padding: 9px 18px;
+            border: 1px solid var(--primary-color);
+            border-radius: 6px;
+            color: var(--primary-color);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-align: center;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+        }
+
+        .button:hover,
+        .button-primary {
+            background: var(--primary-color);
+            color: var(--bg-dark);
+            box-shadow: 0 0 12px rgba(0, 255, 255, 0.45);
+        }
+
+        .button-primary:hover {
+            background: #ffffff;
+            border-color: #ffffff;
+        }
+
+        /* Title block */
+        .intro {
+            padding: clamp(48px, 8vw, 96px) 0 clamp(28px, 4vw, 44px);
+        }
+
+        .intro .eyebrow {
+            color: var(--primary-color);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .intro h1 {
+            margin: 14px 0 18px;
+            color: #ffffff;
+            font-size: clamp(2rem, 5vw, 3.4rem);
+            line-height: 1.2;
+        }
+
+        .intro p {
+            max-width: 68ch;
+            font-size: clamp(1.05rem, 2vw, 1.3rem);
+            font-weight: 300;
+        }
+
+        /* Slides: each section reads as one deck slide */
+        .slides {
+            display: grid;
+            gap: 22px;
+            padding-bottom: 60px;
+        }
+
+        .slide {
+            display: grid;
+            grid-template-columns: 170px minmax(0, 1fr);
+            gap: 28px;
+            padding: clamp(22px, 4vw, 40px);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.06), rgba(255, 0, 255, 0.04)), rgba(20, 20, 50, 0.92);
+        }
+
+        .slide-label {
+            display: grid;
+            align-content: start;
+            gap: 6px;
+        }
+
+        .slide-number {
+            color: var(--secondary-color);
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 600;
+            font-size: 0.8rem;
+            letter-spacing: 0.12em;
+        }
+
+        .slide-label h2 {
+            color: var(--primary-color);
+            font-size: 1.05rem;
+            line-height: 1.35;
+        }
+
+        .slide-body {
+            display: grid;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .slide-body .lead {
+            color: #ffffff;
+            font-size: clamp(1.15rem, 2.2vw, 1.45rem);
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .slide-body p,
+        .slide-body li {
+            max-width: 72ch;
+        }
+
+        .slide-body ul {
+            display: grid;
+            gap: 8px;
+            padding-left: 1.2em;
+        }
+
+        .slide-body li::marker { color: var(--primary-color); }
+
+        .muted {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+        }
+
+        /* Metric tiles */
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .metric {
+            padding: 16px 18px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(5, 5, 21, 0.6);
+            min-width: 0;
+        }
+
+        .metric .value {
+            color: var(--primary-color);
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+            line-height: 1.2;
+        }
+
+        .metric .label {
+            margin-top: 6px;
+            font-size: 0.92rem;
+        }
+
+        /* Two- and three-column cards */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 14px;
+        }
+
+        .card {
+            padding: 18px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            background: rgba(5, 5, 21, 0.55);
+            min-width: 0;
+        }
+
+        .card h3 {
+            margin-bottom: 8px;
+            color: #ffffff;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1.12rem;
+            letter-spacing: 0;
+        }
+
+        .tag {
+            display: inline-block;
+            margin-bottom: 10px;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .tag-now { color: var(--bg-dark); background: var(--primary-color); }
+        .tag-next { color: #ffffff; border: 1px solid var(--secondary-color); }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 6px;
+        }
+
+        footer {
+            padding: 24px 0 36px;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        @media (max-width: 760px) {
+            .slide {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 14px;
+            }
+            .actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .actions .button {
+                padding-inline: 12px;
+            }
+            .metric {
+                padding: 14px;
+            }
+        }
+
+        @media print {
+            body { background: #ffffff; color: #111111; }
+            header, .actions, .header-links { display: none; }
+            .slide { break-inside: avoid; background: #ffffff; border-color: #999999; }
+            .slide-body .lead, .intro h1, .card h3 { color: #111111; }
+            .intro .eyebrow, .slide-label h2, .metric .value, a { color: #006b6b; }
+            .slide-number { color: #8a008a; }
+            .muted, footer { color: #444444; }
+            .metric, .card { background: #ffffff; border-color: #999999; }
+            .tag-now { color: #ffffff; background: #006b6b; }
+            .tag-next { color: #111111; border-color: #8a008a; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <a class="brand" href="./">Vexorium</a>
+            <nav class="header-links" aria-label="Page links">
+                <a class="button" href="./">Home</a>
+                <a class="button button-primary" href="mailto:Jennifer.Y@Vexorium.net?subject=Vexorium%20overview">Contact us</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="intro">
+            <div class="container">
+                <p class="eyebrow">Company overview · Vexorium Technologies Inc.</p>
+                <h1>Low-cost AI agents for formal mathematics and verification</h1>
+                <p>Vexorium builds AI agents that do expert work, starting with domains where every answer can be checked. Our first product is for
+                    mathematics: our agent
+                    rewrites formal proofs in the Lean 4 proof assistant so they are shorter, cheaper to check and still valid across library versions,
+                    and every result is verified by the Lean compiler.</p>
+            </div>
+        </section>
+
+        <div class="container slides">
+            <section class="slide" aria-labelledby="s1">
+                <div class="slide-label">
+                    <span class="slide-number">01</span>
+                    <h2 id="s1">The problem</h2>
+                </div>
+                <div class="slide-body">
+                    <p class="lead">Formal proofs are becoming critical infrastructure, and they are expensive to maintain.</p>
+                    <ul>
+                        <li>Machine-checked proofs now underpin mathematics libraries such as Mathlib, verified cryptography, programming-language
+                            semantics and physics formalizations.</li>
+                        <li>Proofs written by people or by AI models are often long and slow to check, and they break when the proof assistant or
+                            its libraries are upgraded.</li>
+                        <li>Cleaning and porting them takes scarce expert time. Unchecked AI output cannot be trusted in this setting.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="slide" aria-labelledby="s2">
+                <div class="slide-label">
+                    <span class="slide-number">02</span>
+                    <h2 id="s2">What we build</h2>
+                </div>
+                <div class="slide-body">
+                    <p class="lead">An agent that refactors Lean 4 proofs and proves every change with the compiler.</p>
+                    <ul>
+                        <li><strong>Shorter proofs:</strong> fewer tokens for the same theorem, with the statement unchanged.</li>
+                        <li><strong>Cheaper to check:</strong> fewer heartbeats, Lean's deterministic measure of checking work.</li>
+                        <li><strong>Version-robust:</strong> the same proof compiles unchanged on every Lean version it is checked against (all listed
+                            versions in the Arena).</li>
+                        <li><strong>Low cost by design:</strong> our competition agent runs under a fixed API budget per problem (US$3 in the
+                            closed track) and can also run on open-weight models on self-hosted GPUs.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="slide" aria-labelledby="s3">
+                <div class="slide-label">
+                    <span class="slide-number">03</span>
+                    <h2 id="s3">Traction</h2>
+                </div>
+                <div class="slide-body">
+                    <p class="lead">#1 on the closed-source LLM track of the Lean Refactor Arena's public warm-up leaderboard.</p>
+                    <div class="metrics" role="list">
+                        <div class="metric" role="listitem">
+                            <div class="value">93.02</div>
+                            <div class="label">Combined score, ranked #1 (entry "Vexorium-Agent")</div>
+                        </div>
+                        <div class="metric" role="listitem">
+                            <div class="value">88.7%</div>
+                            <div class="label">Shorter than the benchmark's long reference proofs, on average</div>
+                        </div>
+                        <div class="metric" role="listitem">
+                            <div class="value">90.4%</div>
+                            <div class="label">Less checking work (heartbeats) than the references, on average</div>
+                        </div>
+                        <div class="metric" role="listitem">
+                            <div class="value">100%</div>
+                            <div class="label">Of proofs compile on every listed Lean version</div>
+                        </div>
+                    </div>
+                    <p class="muted">As of October 20, 2026, on the 15 public warm-up problems (three each from Strata, PhysLib, CSLib, ArkLib and
+                        PutnamBench). The Arena is the competition of the AI for Verifiable Coding (VeriCodeGen) workshop at NeurIPS 2026; the full
+                        50-problem benchmark opens November 1, when the leaderboard is refreshed, and final results are announced November 22.
+                        The warm-up board accepts any method: our 93.02 entry is a development portfolio built from many runs and is not limited
+                        to the track's US$3-per-problem budget. Final rankings come from the organizers' reproduction of the top entries'
+                        submitted code under that budget.</p>
+                    <ul>
+                        <li><strong>Research:</strong> "The Verification Gap: Auditing Proof Progress and Repair on IMO 2026", accepted at the
+                            MATH-AI 2026 workshop at NeurIPS 2026.</li>
+                        <li><strong>Autoresearch:</strong> two Kaggle silver medals in 26 days (NeuroGolf and ROGII) with one reusable research system.</li>
+                    </ul>
+                    <div class="actions">
+                        <a class="button" href="https://huggingface.co/spaces/delta-lab-ai/lean-refactor-arena">Lean Refactor Arena<span aria-hidden="true">&nbsp;↗</span></a>
+                        <a class="button" href="https://github.com/bobbercheng/verification-gap/blob/main/paper.pdf">Read the paper (PDF)<span aria-hidden="true">&nbsp;↗</span></a>
+                        <a class="button" href="./kaggle-autoresearch.html">Kaggle story<span aria-hidden="true">&nbsp;→</span></a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="slide" aria-labelledby="s4">
+                <div class="slide-label">
+                    <span class="slide-number">04</span>
+                    <h2 id="s4">How it works</h2>
+                </div>
+                <div class="slide-body">
+                    <p class="lead">Models propose; the compiler decides.</p>
+                    <ul>
+                        <li>An agent harness drives language models with the Lean compiler in the loop.</li>
+                        <li>Every candidate is compiled and measured for length, checking cost and compatibility before it is kept. Nothing is
+                            accepted on a model's word.</li>
+                        <li>Model calls are budgeted per problem.</li>
+                        <li>The same harness runs frontier API models or self-hosted open-weight models, so the cost can be chosen per task.</li>
+                    </ul>
+                    <p class="muted">Code, reproduction steps and our technical report will be published after the competition:
+                        <a href="https://github.com/bobbercheng/vexorium-lean-refactor">github.com/bobbercheng/vexorium-lean-refactor</a>.</p>
+                </div>
+            </section>
+
+            <section class="slide" aria-labelledby="s5">
+                <div class="slide-label">
+                    <span class="slide-number">05</span>
+                    <h2 id="s5">Products and business model</h2>
+                </div>
+                <div class="slide-body">
+                    <div class="cards">
+                        <article class="card">
+                            <span class="tag tag-now">Available</span>
+                            <h3>Research engagements</h3>
+                            <p>Fixed-scope projects on a client's technical, business or future challenge, run with our autoresearch system.</p>
+                        </article>
+                        <article class="card">
+                            <span class="tag tag-next">Seeking pilot teams</span>
+                            <h3>Proof refactoring agent</h3>
+                            <p>For teams that maintain formal proofs: shorter, faster-checking, version-robust proofs, delivered with compiler
+                                evidence for every change.</p>
+                        </article>
+                        <article class="card">
+                            <span class="tag tag-next">Planned</span>
+                            <h3>Market research agent</h3>
+                            <p>Our reasoning stack applied to stock-market research, planned for a small group of early users later this year.</p>
+                        </article>
+                    </div>
+                    <p class="muted">We start where answers can be verified, prove the method in public competitions, then sell the same agents
+                        to teams with domain problems of their own.</p>
+                </div>
+            </section>
+
+            <section class="slide" aria-labelledby="s6">
+                <div class="slide-label">
+                    <span class="slide-number">06</span>
+                    <h2 id="s6">Roadmap</h2>
+                </div>
+                <div class="slide-body">
+                    <ul>
+                        <li><strong>November 2026:</strong> final runs on the Arena's full 50-problem benchmark; technical report and code release
+                            after the competition.</li>
+                        <li><strong>December 2026:</strong> presenting the Verification Gap paper at the MATH-AI workshop, NeurIPS 2026.</li>
+                        <li><strong>Next:</strong> pilots of the proof refactoring agent with teams that maintain Lean projects, and early access
+                            to the market research agent.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="slide" aria-labelledby="s7">
+                <div class="slide-label">
+                    <span class="slide-number">07</span>
+                    <h2 id="s7">Team and contact</h2>
+                </div>
+                <div class="slide-body">
+                    <p>Co-founder: Bobber Cheng, author of the MATH-AI 2026 paper above.</p>
+                    <div class="actions">
+                        <a class="button button-primary" href="mailto:Jennifer.Y@Vexorium.net?subject=Vexorium%20overview">Contact us<span aria-hidden="true">&nbsp;→</span></a>
+                        <a class="button" href="./">vexorium.net</a>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Vexorium Technologies Inc. Leaderboard figures as of October 20, 2026.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -13,7 +13,10 @@
     <meta property="og:image" content="https://www.vexorium.net/vexorium-logo.png">
     <meta name="twitter:card" content="summary">
     <link rel="icon" type="image/png" href="./vexorium-logo.png">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..700&family=Exo+2:wght@300..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./site.css">
     <style>
         :root {
             --bg-dark: #050515;
@@ -27,20 +30,11 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        html { scroll-behavior: smooth; }
-
         body {
             font-family: 'Exo 2', sans-serif;
             background: var(--bg-dark) url('space-bg.svg') no-repeat top center / cover fixed;
             color: var(--text-light);
             line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding-left: max(20px, env(safe-area-inset-left, 0px));
-            padding-right: max(20px, env(safe-area-inset-right, 0px));
         }
 
         h1, h2, h3 {
@@ -54,40 +48,6 @@
         a:focus-visible {
             outline: 3px solid #ffffff;
             outline-offset: 4px;
-        }
-
-        /* Header */
-        header {
-            padding: 20px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            background: rgba(5, 5, 21, 0.85);
-            backdrop-filter: blur(6px);
-        }
-
-        header .container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px 20px;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .brand {
-            display: inline-flex;
-            align-items: center;
-            min-height: 44px;
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.35rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            text-shadow: 0 0 6px rgba(0, 255, 255, 0.7);
-            text-decoration: none;
-        }
-
-        .header-links {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
         }
 
         .button {
@@ -286,14 +246,6 @@
             margin-top: 6px;
         }
 
-        footer {
-            padding: 24px 0 36px;
-            border-top: 1px solid rgba(255, 255, 255, 0.12);
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            text-align: center;
-        }
-
         @media (max-width: 760px) {
             .slide {
                 grid-template-columns: minmax(0, 1fr);
@@ -313,32 +265,55 @@
 
         @media print {
             body { background: #ffffff; color: #111111; }
-            header, .actions, .header-links { display: none; }
+            .actions { display: none; }
             .slide { break-inside: avoid; background: #ffffff; border-color: #999999; }
             .slide-body .lead, .intro h1, .card h3 { color: #111111; }
             .intro .eyebrow, .slide-label h2, .metric .value, a { color: #006b6b; }
             .slide-number { color: #8a008a; }
-            .muted, footer { color: #444444; }
+            .muted, .site-footer { color: #444444; }
             .metric, .card { background: #ffffff; border-color: #999999; }
             .tag-now { color: #ffffff; background: #006b6b; }
             .tag-next { color: #111111; border-color: #8a008a; }
         }
     </style>
 </head>
-<body>
-    <header>
-        <div class="container">
-            <a class="brand" href="./">Vexorium</a>
-            <nav class="header-links" aria-label="Page links">
-                <a class="button" href="./">Home</a>
-                <a class="button button-primary" href="mailto:Jennifer.Y@Vexorium.net?subject=Vexorium%20overview">Contact us</a>
+<body id="top">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+        <div class="container site-bar">
+            <a class="site-logo" href="./" aria-label="Vexorium home">Vexorium</a>
+            <nav class="site-nav" aria-label="Main">
+                <a href="./#research">Research</a>
+                <a href="./overview.html" aria-current="page">Overview</a>
+                <a class="site-contact" href="mailto:Jennifer.Y@Vexorium.net?subject=Vexorium%20overview">Contact<span class="site-contact-extra">&nbsp;us</span></a>
             </nav>
         </div>
+        <nav class="page-nav" aria-label="On this page">
+            <div class="container page-nav-inner">
+                <span class="page-nav-label">On this page</span>
+                <ul class="page-nav-links">
+                    <li><a href="#problem">Problem</a></li>
+                    <li><a href="#product">Product</a></li>
+                    <li><a href="#traction">Traction</a></li>
+                    <li><a href="#how-it-works">How it works</a></li>
+                    <li><a href="#business">Business</a></li>
+                    <li><a href="#roadmap">Roadmap</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+                <a class="to-top" href="#top">Top <span aria-hidden="true">&nbsp;↑</span></a>
+            </div>
+        </nav>
     </header>
 
-    <main>
+    <main id="main">
         <section class="intro">
             <div class="container">
+                <nav class="breadcrumb" aria-label="Breadcrumb">
+                    <ol>
+                        <li><a href="./">Home</a></li>
+                        <li><span aria-current="page">Overview</span></li>
+                    </ol>
+                </nav>
                 <p class="eyebrow">Company overview · Vexorium Technologies Inc.</p>
                 <h1>Low-cost AI agents for formal mathematics and verification</h1>
                 <p>Vexorium builds AI agents that do expert work, starting with domains where every answer can be checked. Our first product is for
@@ -349,7 +324,7 @@
         </section>
 
         <div class="container slides">
-            <section class="slide" aria-labelledby="s1">
+            <section id="problem" class="slide" aria-labelledby="s1">
                 <div class="slide-label">
                     <span class="slide-number">01</span>
                     <h2 id="s1">The problem</h2>
@@ -366,7 +341,7 @@
                 </div>
             </section>
 
-            <section class="slide" aria-labelledby="s2">
+            <section id="product" class="slide" aria-labelledby="s2">
                 <div class="slide-label">
                     <span class="slide-number">02</span>
                     <h2 id="s2">What we build</h2>
@@ -384,7 +359,7 @@
                 </div>
             </section>
 
-            <section class="slide" aria-labelledby="s3">
+            <section id="traction" class="slide" aria-labelledby="s3">
                 <div class="slide-label">
                     <span class="slide-number">03</span>
                     <h2 id="s3">Traction</h2>
@@ -428,7 +403,7 @@
                 </div>
             </section>
 
-            <section class="slide" aria-labelledby="s4">
+            <section id="how-it-works" class="slide" aria-labelledby="s4">
                 <div class="slide-label">
                     <span class="slide-number">04</span>
                     <h2 id="s4">How it works</h2>
@@ -447,7 +422,7 @@
                 </div>
             </section>
 
-            <section class="slide" aria-labelledby="s5">
+            <section id="business" class="slide" aria-labelledby="s5">
                 <div class="slide-label">
                     <span class="slide-number">05</span>
                     <h2 id="s5">Products and business model</h2>
@@ -476,7 +451,7 @@
                 </div>
             </section>
 
-            <section class="slide" aria-labelledby="s6">
+            <section id="roadmap" class="slide" aria-labelledby="s6">
                 <div class="slide-label">
                     <span class="slide-number">06</span>
                     <h2 id="s6">Roadmap</h2>
@@ -492,7 +467,7 @@
                 </div>
             </section>
 
-            <section class="slide" aria-labelledby="s7">
+            <section id="contact" class="slide" aria-labelledby="s7">
                 <div class="slide-label">
                     <span class="slide-number">07</span>
                     <h2 id="s7">Team and contact</h2>
@@ -508,10 +483,19 @@
         </div>
     </main>
 
-    <footer>
-        <div class="container">
+    <footer class="site-footer">
+        <div class="container site-footer-inner">
+            <nav aria-label="Footer">
+                <a href="./">Home</a>
+                <a href="./#research">Research</a>
+                <a href="./kaggle-autoresearch.html">Kaggle story</a>
+                <a href="./overview.html">Overview</a>
+                <a href="mailto:Jennifer.Y@Vexorium.net">Contact</a>
+            </nav>
             <p>&copy; 2026 Vexorium Technologies Inc. Leaderboard figures as of October 20, 2026.</p>
         </div>
     </footer>
+
+    <script src="./site.js"></script>
 </body>
 </html>

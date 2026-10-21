@@ -11,7 +11,8 @@
     <link rel="icon" type="image/png" href="./vexorium-logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&amp;family=Orbitron:wght@500;600;700&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..700&amp;family=Exo+2:wght@300..700&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./site.css">
 
     <meta property="og:type" content="article">
     <meta property="og:site_name" content="Vexorium">
@@ -74,15 +75,10 @@
             --text: #eef2ff;
             --muted: #aeb7d1;
             --line: rgba(156, 184, 255, 0.18);
-            --max-width: 1160px;
         }
 
         * {
             box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
         }
 
         body {
@@ -120,50 +116,10 @@
             color: #ffffff;
         }
 
-        .container {
-            width: min(calc(100% - 40px), var(--max-width));
-            margin: 0 auto;
-        }
-
-        .site-header {
-            position: relative;
-            z-index: 10;
-            border-bottom: 1px solid var(--line);
-            background: rgba(5, 5, 21, 0.82);
-            backdrop-filter: blur(14px);
-        }
-
-        .nav {
-            min-height: 76px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 24px;
-        }
-
-        .brand {
-            color: var(--cyan);
-            font-family: "Orbitron", sans-serif;
-            font-size: 1.05rem;
-            font-weight: 700;
-            letter-spacing: 0.16em;
-            text-decoration: none;
-            text-shadow: 0 0 18px rgba(89, 243, 255, 0.45);
-        }
-
-        .nav-link {
-            color: var(--muted);
-            font-size: 0.86rem;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-decoration: none;
-            text-transform: uppercase;
-        }
-
         .hero {
             position: relative;
             overflow: hidden;
-            padding: 112px 0 76px;
+            padding: 64px 0 76px;
             border-bottom: 1px solid var(--line);
         }
 
@@ -186,7 +142,6 @@
         .hero-content {
             position: relative;
             z-index: 1;
-            max-width: 970px;
         }
 
         .eyebrow {
@@ -559,7 +514,7 @@
 
         .case-aside {
             position: sticky;
-            top: 28px;
+            top: var(--site-offset);
             padding: 28px;
             border: 1px solid var(--line);
             border-radius: 18px;
@@ -785,25 +740,6 @@
             font-size: 1.08rem;
         }
 
-        .site-footer {
-            padding: 28px 0;
-            border-top: 1px solid var(--line);
-            color: var(--muted);
-            background: rgba(5, 5, 21, 0.86);
-            font-size: 0.82rem;
-        }
-
-        .footer-content {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-        }
-
-        .footer-content p {
-            margin: 0;
-        }
-
         @media (max-width: 1040px) {
             .research-loop {
                 grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -828,20 +764,8 @@
                 font-size: 17px;
             }
 
-            .container {
-                width: min(calc(100% - 28px), var(--max-width));
-            }
-
-            .nav {
-                min-height: 66px;
-            }
-
-            .nav-link {
-                font-size: 0.72rem;
-            }
-
             .hero {
-                padding: 80px 0 52px;
+                padding: 40px 0 52px;
             }
 
             .signal-strip,
@@ -887,18 +811,9 @@
             .cta::after {
                 display: none;
             }
-
-            .footer-content {
-                align-items: flex-start;
-                flex-direction: column;
-            }
         }
 
         @media (max-width: 460px) {
-            .brand {
-                font-size: 0.92rem;
-            }
-
             .hero-actions {
                 align-items: stretch;
                 flex-direction: column;
@@ -914,10 +829,6 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
-            html {
-                scroll-behavior: auto;
-            }
-
             *,
             *::before,
             *::after {
@@ -926,18 +837,45 @@
         }
     </style>
 </head>
-<body>
+<body id="top">
+    <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
-        <div class="container nav">
-            <a class="brand" href="./">VEXORIUM</a>
-            <a class="nav-link" href="mailto:Jennifer.Y@Vexorium.net?subject=Autoresearch%20program">Build with us</a>
+        <div class="container site-bar">
+            <a class="site-logo" href="./" aria-label="Vexorium home">Vexorium</a>
+            <nav class="site-nav" aria-label="Main">
+                <a href="./#research" aria-current="true">Research</a>
+                <a href="./overview.html">Overview</a>
+                <a class="site-contact" href="mailto:Jennifer.Y@Vexorium.net?subject=Autoresearch%20program">Contact<span class="site-contact-extra">&nbsp;us</span></a>
+            </nav>
         </div>
+        <nav class="page-nav" aria-label="On this page">
+            <div class="container page-nav-inner">
+                <span class="page-nav-label">On this page</span>
+                <ul class="page-nav-links">
+                    <li><a href="#results">Results</a></li>
+                    <li><a href="#system">System</a></li>
+                    <li><a href="#neurogolf">NeuroGolf</a></li>
+                    <li><a href="#rogii">ROGII</a></li>
+                    <li><a href="#moat">Moat</a></li>
+                    <li><a href="#sources">Sources</a></li>
+                    <li><a href="#work-with-us">Work with us</a></li>
+                </ul>
+                <a class="to-top" href="#top">Top <span aria-hidden="true">&nbsp;↑</span></a>
+            </div>
+        </nav>
     </header>
 
-    <main>
+    <main id="main">
         <article>
             <header class="hero">
                 <div class="container hero-content">
+                    <nav class="breadcrumb" aria-label="Breadcrumb">
+                        <ol>
+                            <li><a href="./">Home</a></li>
+                            <li><a href="./#research">Research</a></li>
+                            <li><span aria-current="page">Kaggle field report</span></li>
+                        </ol>
+                    </nav>
                     <p class="eyebrow">Autoresearch field report · August 9, 2026</p>
                     <h1>Two Kaggle silver medals. <span class="gradient-text">Twenty-six days.</span></h1>
                     <p class="hero-lead">
@@ -1281,7 +1219,7 @@
                 </div>
             </section>
 
-            <section class="cta-section">
+            <section class="cta-section" id="work-with-us">
                 <div class="container">
                     <div class="cta">
                         <div class="cta-content">
@@ -1303,10 +1241,18 @@
     </main>
 
     <footer class="site-footer">
-        <div class="container footer-content">
-            <p>© 2026 Vexorium. The future, empowered.</p>
-            <a href="./">Return to Vexorium</a>
+        <div class="container site-footer-inner">
+            <nav aria-label="Footer">
+                <a href="./">Home</a>
+                <a href="./#research">Research</a>
+                <a href="./kaggle-autoresearch.html">Kaggle story</a>
+                <a href="./overview.html">Overview</a>
+                <a href="mailto:Jennifer.Y@Vexorium.net">Contact</a>
+            </nav>
+            <p>&copy; 2026 Vexorium Technologies Inc. The future, empowered.</p>
         </div>
     </footer>
+
+    <script src="./site.js"></script>
 </body>
 </html>

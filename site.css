@@ -64,6 +64,7 @@ html {
 .site-logo {
     display: inline-flex;
     align-items: center;
+    gap: 10px;
     min-height: 44px;
     color: var(--site-cyan);
     font-family: 'Orbitron', sans-serif;
@@ -71,6 +72,17 @@ html {
     font-weight: 700;
     letter-spacing: 0.04em;
     text-decoration: none;
+}
+
+/* The V mark from vexorium-logo.png, on the logo's white background */
+.site-logo-mark {
+    flex: none;
+    box-sizing: border-box;
+    width: 36px;
+    height: 36px;
+    padding: 4px;
+    border-radius: 8px;
+    background: #ffffff;
 }
 
 .site-nav {
@@ -301,7 +313,8 @@ html {
         --site-bar-h: 56px;
     }
 
-    .site-logo { font-size: 1.05rem; }
+    .site-logo { gap: 8px; font-size: 1.05rem; }
+    .site-logo-mark { width: 30px; height: 30px; padding: 3px; border-radius: 7px; }
     .site-nav { gap: 14px; }
     .site-nav a { font-size: 0.875rem; }
     .site-nav .site-contact { padding: 0 12px; }
@@ -309,13 +322,19 @@ html {
     .page-nav-links a { font-size: 0.85rem; }
 }
 
-/* Smallest phones: keep the logo and all three links on one row. */
-@media (max-width: 374px) {
+/* Phones: keep the logo and all three links on one row. */
+@media (max-width: 419px) {
     .site-bar { gap: 8px; }
-    .site-logo { font-size: 0.9rem; letter-spacing: 0; }
+    .site-logo { gap: 6px; font-size: 0.9rem; letter-spacing: 0; }
+    .site-logo-mark { width: 28px; height: 28px; }
     .site-nav { gap: 10px; }
     .site-nav a { font-size: 0.8125rem; }
     .site-nav .site-contact { padding: 0 8px; }
+}
+
+/* Smallest phones: the V mark alone stands in for the name. */
+@media (max-width: 359px) {
+    .site-logo-text { display: none; }
 }
 
 @media print {

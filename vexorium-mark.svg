@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 486 420.3">
+  <!-- The V mark from vexorium-logo.png, traced from its edges and colors. -->
+  <defs>
+    <linearGradient id="vexorium-mark-fade" gradientUnits="userSpaceOnUse" x1="343.1" y1="94.3" x2="202.3" y2="252.8">
+      <stop offset="0" stop-color="#333a8c"/>
+      <stop offset="1" stop-color="#12366c"/>
+    </linearGradient>
+  </defs>
+  <path fill="#12366c" d="M0 0h117.8l109.6 190-58.3 101.1z"/>
+  <path fill="url(#vexorium-mark-fade)" d="M367.7 0H486L243.3 420.3l-58.6-100.8z"/>
+</svg>
